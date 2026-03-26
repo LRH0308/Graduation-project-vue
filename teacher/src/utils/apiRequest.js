@@ -1,0 +1,153 @@
+// src/utils/apiRequest.js
+import request from "./request";
+import { API } from "./api";
+
+/**
+ * 统一 API 调用方法
+ * @param {Object} apiConfig - API 配置 { url, method }
+ * @param {Object} data - 请求数据
+ * @param {Object} config - 额外配置
+ * @returns {Promise}
+ */
+const apiCall = (apiConfig, data = {}, config = {}) => {
+  if (!apiConfig || !apiConfig.url) {
+    console.error("API 配置无效");
+    return Promise.reject(new Error("API 配置无效"));
+  }
+
+  const { url, method } = apiConfig;
+
+  return request({
+    url,
+    method: method || "post",
+    data,
+    ...config,
+  });
+};
+
+// ==================== 用户相关接口 ====================
+
+export const userApi = {
+  checkCode: (config = {}) =>
+    apiCall(API.USER.CHECK_CODE, {}, { ...config, showLoading: false }),
+  register: (data, config = {}) => apiCall(API.USER.REGISTER, data, config),
+  login: (data, config = {}) =>
+    apiCall(API.USER.LOGIN, data, {
+      ...config,
+      isForm: true,
+      showLoading: false,
+    }),
+  getLoginInfo: (config = {}) => apiCall(API.USER.GET_LOGIN_INFO, {}, config),
+  logout: (config = {}) => apiCall(API.USER.LOGOUT, {}, config),
+  updatePassword: (data, config = {}) =>
+    apiCall(API.USER.UPDATE_PASSWORD, data, config),
+};
+
+// ==================== 选题管理接口 ====================
+
+export const topicApi = {
+  apply: (data, config = {}) => apiCall(API.TOPIC_SELECT.APPLY, data, config),
+  getTopicSelection: (data = {}, config = {}) =>
+    apiCall(API.TOPIC_SELECT.GET_TOPIC_SELECTION, data, config),
+  publish: (topicId, config = {}) =>
+    apiCall(API.TOPIC_SELECT.PUBLISH, {}, { ...config, params: { topicId } }),
+};
+
+// ==================== 任务书接口 ====================
+
+export const taskBookApi = {
+  getTaskBook: (data = {}, config = {}) =>
+    apiCall(API.TASK_BOOK.GET_TASK_BOOK, data, config),
+  applyTaskBook: (data, config = {}) =>
+    apiCall(API.TASK_BOOK.APPLY_TASK_BOOK, data, config),
+};
+
+// ==================== 开题报告接口 ====================
+
+export const openingReportApi = {
+  getOpeningReport: (data = {}, config = {}) =>
+    apiCall(API.OPENING_REPORT.GET_OPENING_REPORT, data, config),
+  teacherAudit: (data, config = {}) =>
+    apiCall(API.OPENING_REPORT.TEACHER_AUDIT, data, config),
+};
+
+// ==================== 中期检查接口 ====================
+
+export const midtermCheckApi = {
+  getMidtermCheck: (data = {}, config = {}) =>
+    apiCall(API.MIDTERM_CHECK.GET_MIDTERM_CHECK, data, config),
+  teacherAudit: (data, config = {}) =>
+    apiCall(API.MIDTERM_CHECK.TEACHER_AUDIT, data, config),
+};
+
+// ==================== 论文初稿接口 ====================
+
+export const thesisDraftApi = {
+  getThesisDraft: (data = {}, config = {}) =>
+    apiCall(API.THESIS_DRAFT.GET_THESIS_DRAFT, data, config),
+  teacherAudit: (data, config = {}) =>
+    apiCall(API.THESIS_DRAFT.TEACHER_AUDIT, data, config),
+  getDuplicateCheckThreshold: (config = {}) =>
+    apiCall(API.THESIS_DRAFT.GET_DUPLICATE_CHECK_THRESHOLD, {}, config),
+  setDuplicateCheckThreshold: (data, config = {}) =>
+    apiCall(API.THESIS_DRAFT.SET_DUPLICATE_CHECK_THRESHOLD, data, config),
+};
+
+// ==================== 论文终稿接口 ====================
+
+export const thesisFinalApi = {
+  getThesisFinalList: (data = {}, config = {}) =>
+    apiCall(API.THESIS_FINAL.GET_THESIS_FINAL_LIST, data, config),
+};
+
+// ==================== 答辩安排接口 ====================
+
+export const defenseApi = {
+  getDefenseArrangement: (data = {}, config = {}) =>
+    apiCall(API.DEFENSE_ARRANGEMENT.GET_DEFENSE_ARRANGEMENT, data, config),
+};
+
+// ==================== 过程指导接口 ====================
+
+export const guidanceApi = {
+  getProcessGuidanceRecord: (data = {}, config = {}) =>
+    apiCall(
+      API.PROCESS_GUIDANCE_RECORD.GET_PROCESS_GUIDANCE_RECORD,
+      data,
+      config,
+    ),
+  teacherFill: (data, config = {}) =>
+    apiCall(API.PROCESS_GUIDANCE_RECORD.TEACHER_FILL, data, config),
+};
+
+// ==================== 文件管理接口 ====================
+
+export const fileApi = {
+  upload: (file, data = {}, config = {}) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    Object.keys(data).forEach((key) => {
+      formData.append(key, data[key] ?? "");
+    });
+    return apiCall(API.FILE.UPLOAD, formData, {
+      ...config,
+      isForm: false,
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+};
+
+// ==================== 统一导出 ====================
+
+export default {
+  userApi,
+  topicApi,
+  taskBookApi,
+  openingReportApi,
+  midtermCheckApi,
+  thesisDraftApi,
+  thesisFinalApi,
+  defenseApi,
+  guidanceApi,
+  fileApi,
+};
