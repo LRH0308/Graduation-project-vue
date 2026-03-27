@@ -26,32 +26,19 @@
         <el-table-column prop="topicName" label="课题名称" />
         <el-table-column prop="teacherName" label="指导教师" />
         <el-table-column prop="deptName" label="所属系部" />
-        <el-table-column prop="applyStatus" label="审核状态">
-          <template #default="{ row }">
-            <el-tag :type="getApplyStatusType(row.applyStatus)">
-              {{ getApplyStatusText(row.applyStatus) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="publishStatus" label="发布状态">
-          <template #default="{ row }">
-            <el-tag :type="getPublishStatusType(row.publishStatus)">
-              {{ getPublishStatusText(row.publishStatus) }}
-            </el-tag>
-          </template>
-        </el-table-column>
         <el-table-column prop="studentName" label="选题学生" />
-        <el-table-column label="操作" width="200">
+        <el-table-column prop="applyStatusStudent" label="学生选题状态">
+          <template #default="{ row }">
+            <el-tag :type="row.applyStatusStudent ? 'success' : 'info'">
+              {{ row.applyStatusStudent ? '已选题' : '未选题' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="departmentheadName" label="系主任" />
+        <el-table-column prop="departmentheadOpinion" label="系主任意见" />
+        <el-table-column label="操作" width="120">
           <template #default="{ row }">
             <el-button size="small" @click="handleViewDetail(row)">详情</el-button>
-            <el-button
-              v-if="row.applyStatus === 1 && row.publishStatus === 0"
-              size="small"
-              type="primary"
-              @click="handlePublish(row)"
-            >
-              发布
-            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -77,9 +64,13 @@
         <el-descriptions-item label="指导教师">{{ currentSubject.teacherName }}</el-descriptions-item>
         <el-descriptions-item label="教师工号">{{ currentSubject.teacherAccount }}</el-descriptions-item>
         <el-descriptions-item label="所属系部">{{ currentSubject.deptName }}</el-descriptions-item>
-        <el-descriptions-item label="审核状态">{{ getApplyStatusText(currentSubject.applyStatus) }}</el-descriptions-item>
-        <el-descriptions-item label="发布状态">{{ getPublishStatusText(currentSubject.publishStatus) }}</el-descriptions-item>
+        <el-descriptions-item label="系主任">{{ currentSubject.departmentheadName }}</el-descriptions-item>
+        <el-descriptions-item label="系主任工号">{{ currentSubject.departmentheadAccount }}</el-descriptions-item>
+        <el-descriptions-item label="系主任意见">{{ currentSubject.departmentheadOpinion || '无' }}</el-descriptions-item>
         <el-descriptions-item label="选题学生">{{ currentSubject.studentName || '未选题' }}</el-descriptions-item>
+        <el-descriptions-item label="学生工号">{{ currentSubject.studentAccount || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="学生选题状态">{{ currentSubject.applyStatusStudent ? '已选题' : '未选题' }}</el-descriptions-item>
+        <el-descriptions-item label="学生申请时间">{{ currentSubject.studentApplyTime || '无' }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
@@ -184,48 +175,7 @@ const handleViewDetail = (row) => {
   detailDialogVisible.value = true
 }
 
-// 发布课题
-const handlePublish = async (row) => {
-  await ElMessageBox.confirm('确认发布该课题吗？', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  })
-  
-  try {
-    const res = await topicApi.publish(row.id)
-    if (res?.status === 'success') {
-      ElMessage.success('发布成功')
-      getSubjectList()
-    }
-  } catch (error) {
-    console.error('发布失败:', error)
-  }
-}
 
-// 获取审核状态文本
-const getApplyStatusText = (status) => {
-  const map = { 0: '申请中', 1: '已通过', 2: '已驳回' }
-  return map[status] || '未知'
-}
-
-// 获取审核状态类型
-const getApplyStatusType = (status) => {
-  const map = { 0: 'warning', 1: 'success', 2: 'danger' }
-  return map[status] || 'info'
-}
-
-// 获取发布状态文本
-const getPublishStatusText = (status) => {
-  const map = { 0: '未发布', 1: '已发布', 2: '已下线' }
-  return map[status] || '未知'
-}
-
-// 获取发布状态类型
-const getPublishStatusType = (status) => {
-  const map = { 0: 'info', 1: 'success', 2: 'danger' }
-  return map[status] || 'info'
-}
 
 onMounted(() => {
   getSubjectList()

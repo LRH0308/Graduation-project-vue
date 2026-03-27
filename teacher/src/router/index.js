@@ -27,16 +27,17 @@ const router = createRouter({
           name: "Home",
           component: () => import("@/views/home/Home.vue"),
         },
+        // 指导学生信息
+        {
+          path: "/student/info",
+          name: "StudentInfo",
+          component: () => import("@/views/student/StudentInfo.vue"),
+        },
         // 选题管理
         {
-          path: "/subject/apply",
-          name: "SubjectApply",
-          component: () => import("@/views/subject/TopicApply.vue"),
-        },
-        {
-          path: "/subject/list",
-          name: "SubjectList",
-          component: () => import("@/views/subject/SubjectList.vue"),
+          path: "/subject/manage",
+          name: "SubjectManage",
+          component: () => import("@/views/subject/SubjectManage.vue"),
         },
         // 任务书
         {

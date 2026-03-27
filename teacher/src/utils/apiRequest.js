@@ -51,6 +51,7 @@ export const topicApi = {
     apiCall(API.TOPIC_SELECT.GET_TOPIC_SELECTION, data, config),
   publish: (topicId, config = {}) =>
     apiCall(API.TOPIC_SELECT.PUBLISH, {}, { ...config, params: { topicId } }),
+  getDept: (config = {}) => apiCall(API.TOPIC_SELECT.GET_DEPT, {}, config),
 };
 
 // ==================== 任务书接口 ====================
@@ -120,6 +121,22 @@ export const guidanceApi = {
     apiCall(API.PROCESS_GUIDANCE_RECORD.TEACHER_FILL, data, config),
 };
 
+// ==================== 指导关系接口 ====================
+
+export const guidanceRelationApi = {
+  getGuidanceRelation: (data = {}, config = {}) =>
+    apiCall(API.GUIDANCE_RELATION.GET_GUIDANCE_RELATION, data, config),
+};
+
+// ==================== 论文审核接口 ====================
+
+export const thesisApi = {
+  getThesisSubmission: (data = {}, config = {}) =>
+    apiCall(API.THESIS.GET_THESIS_SUBMISSION, data, config),
+  teacherAudit: (data, config = {}) =>
+    apiCall(API.THESIS.TEACHER_AUDIT, data, config),
+};
+
 // ==================== 文件管理接口 ====================
 
 export const fileApi = {
@@ -147,7 +164,9 @@ export default {
   midtermCheckApi,
   thesisDraftApi,
   thesisFinalApi,
+  thesisApi,
   defenseApi,
   guidanceApi,
+  guidanceRelationApi,
   fileApi,
 };

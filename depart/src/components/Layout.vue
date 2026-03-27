@@ -22,11 +22,6 @@
             <span class="grid-label">系部</span>
             <span class="grid-value">{{ userStore.userInfo?.department || "-" }}</span>
           </div>
-
-          <div class="info-grid">
-            <span class="grid-label">职称</span>
-            <span class="grid-value">{{ userStore.userInfo?.title || "-" }}</span>
-          </div>
         </div>
 
         <!-- 退出登录按钮 -->

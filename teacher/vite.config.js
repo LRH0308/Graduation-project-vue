@@ -16,7 +16,7 @@ export default defineConfig({
     hmr: true,
     proxy: {
       "/teacher": {
-        target: "http://localhost:9091",
+        target: "http://localhost:9094",
         changeOrigin: true,
       },
     },

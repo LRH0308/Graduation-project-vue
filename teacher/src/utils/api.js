@@ -24,6 +24,7 @@ export const API = {
       method: "post",
     },
     PUBLISH: { url: "/topicSelect/publish", method: "get" },
+    GET_DEPT: { url: "/topicSelect/getDept", method: "get" },
   },
 
   // ==================== 任务书 ====================
@@ -60,6 +61,12 @@ export const API = {
     GET_THESIS_FINAL_LIST: { url: "/ThesisFinal/getThesisFinalList", method: "post" },
   },
 
+  // ==================== 论文审核 ====================
+  THESIS: {
+    GET_THESIS_SUBMISSION: { url: "/thesis/getThesisSubmission", method: "post" },
+    TEACHER_AUDIT: { url: "/thesis/teacherAudit", method: "post" },
+  },
+
   // ==================== 答辩安排 ====================
   DEFENSE_ARRANGEMENT: {
     GET_DEFENSE_ARRANGEMENT: {
@@ -75,6 +82,11 @@ export const API = {
       method: "post",
     },
     TEACHER_FILL: { url: "/processGuidanceRecord/teacherFill", method: "post" },
+  },
+
+  // ==================== 指导关系 ====================
+  GUIDANCE_RELATION: {
+    GET_GUIDANCE_RELATION: { url: "/GuidanceRelation/getGuidanceRelation", method: "post" },
   },
 
   // ==================== 文件管理 ====================

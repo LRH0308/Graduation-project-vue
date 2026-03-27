@@ -3,7 +3,7 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>开题报告审核</span>
+          <span>开题报告</span>
         </div>
       </template>
       

@@ -14,13 +14,13 @@
       <!-- 搜索表单 -->
       <el-form :model="searchForm" inline class="search-form">
         <el-form-item label="课题名称">
-          <el-input v-model="searchForm.projectName" placeholder="请输入课题名称" clearable />
+          <el-input v-model="searchForm.topicName" placeholder="请输入课题名称" clearable />
         </el-form-item>
         <el-form-item label="毕业时间">
           <el-input v-model="searchForm.graduationTime" placeholder="如：2026" clearable />
         </el-form-item>
         <el-form-item label="审核状态">
-          <el-select v-model="searchForm.deptAuditStatus" placeholder="请选择" clearable style="width: 150px;">
+          <el-select v-model="searchForm.applyStatus" placeholder="请选择" clearable style="width: 150px;">
             <el-option label="待审核" :value="0" />
             <el-option label="已通过" :value="1" />
             <el-option label="已驳回" :value="2" />
@@ -34,30 +34,28 @@
       
       <!-- 课题列表 -->
       <el-table :data="topicList" v-loading="loading" border stripe>
-        <el-table-column prop="projectName" label="课题名称" min-width="200" />
-        <el-table-column prop="projectType" label="课题类型" width="120" />
-        <el-table-column prop="projectSource" label="课题来源" width="120" />
-        <el-table-column prop="teacherName" label="指导教师" width="120" />
-        <el-table-column prop="publishStatus" label="发布状态" width="100">
+        <el-table-column type="index" label="序列" width="80" />
+        <el-table-column prop="topicName" label="课题名称" min-width="200" />
+        <el-table-column prop="graduationTime" label="毕业时间" width="100" />
+        <el-table-column label="指导教师">
           <template #default="{ row }">
-            <el-tag :type="getPublishStatusType(row.publishStatus)">
-              {{ getPublishStatusText(row.publishStatus) }}
+            {{ row.teacherAccount || '-' }}/{{ row.teacherName || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="deptName" label="所属系部" width="120" />
+        <el-table-column prop="applyStatus" label="审核状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="getAuditStatusType(row.applyStatus)">
+              {{ getAuditStatusText(row.applyStatus) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="审核状态" width="100">
-          <template #default="{ row }">
-            <el-tag :type="getAuditStatusType(row.deptAuditStatus)">
-              {{ getAuditStatusText(row.deptAuditStatus) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="deptAuditTime" label="审核时间" width="160" />
+        <el-table-column prop="auditTime" label="审核时间" width="160" />
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" size="small" @click="handleDetail(row)">详情</el-button>
             <el-button 
-              v-if="row.deptAuditStatus === 0" 
+              v-if="row.applyStatus === 0" 
               type="success" 
               size="small" 
               @click="handleAudit(row, 1)"
@@ -65,7 +63,7 @@
               通过
             </el-button>
             <el-button 
-              v-if="row.deptAuditStatus === 0" 
+              v-if="row.applyStatus === 0" 
               type="danger" 
               size="small" 
               @click="handleAudit(row, 2)"
@@ -93,14 +91,14 @@
     <el-dialog v-model="auditDialogVisible" :title="auditTitle" width="500px">
       <el-form :model="auditForm" label-width="80px">
         <el-form-item label="审核状态">
-          <el-radio-group v-model="auditForm.deptAuditStatus">
+          <el-radio-group v-model="auditForm.applyStatus">
             <el-radio :label="1">通过</el-radio>
             <el-radio :label="2">驳回</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="审核意见">
           <el-input
-            v-model="auditForm.deptAuditRemark"
+            v-model="auditForm.departmentheadOpinion"
             type="textarea"
             :rows="4"
             placeholder="请输入审核意见"
@@ -114,17 +112,39 @@
     </el-dialog>
     
     <!-- 详情对话框 -->
-    <el-dialog v-model="detailDialogVisible" title="课题详情" width="600px">
+    <el-dialog v-model="detailDialogVisible" title="课题详情" width="700px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="课题名称">{{ currentTopic.projectName }}</el-descriptions-item>
-        <el-descriptions-item label="课题类型">{{ currentTopic.projectType }}</el-descriptions-item>
-        <el-descriptions-item label="课题来源">{{ currentTopic.projectSource }}</el-descriptions-item>
-        <el-descriptions-item label="课题要求">{{ currentTopic.projectRequirement }}</el-descriptions-item>
-        <el-descriptions-item label="指导教师">{{ currentTopic.teacherName }}</el-descriptions-item>
+        <el-descriptions-item label="课题名称">{{ currentTopic.topicName }}</el-descriptions-item>
+        <el-descriptions-item label="课题描述">{{ currentTopic.topicDesc }}</el-descriptions-item>
+        <el-descriptions-item label="研究内容" :span="2">{{ currentTopic.researchContent || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="毕业时间">{{ currentTopic.graduationTime }}</el-descriptions-item>
+        <el-descriptions-item label="所属系部">{{ currentTopic.deptName }}</el-descriptions-item>
         <el-descriptions-item label="发布状态">{{ getPublishStatusText(currentTopic.publishStatus) }}</el-descriptions-item>
-        <el-descriptions-item label="审核状态">{{ getAuditStatusText(currentTopic.deptAuditStatus) }}</el-descriptions-item>
-        <el-descriptions-item label="审核时间">{{ currentTopic.deptAuditTime || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="审核意见">{{ currentTopic.deptAuditRemark || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="发布时间">{{ currentTopic.publishTime || '无' }}</el-descriptions-item>
+      </el-descriptions>
+      
+      <el-divider content-position="left">导师信息</el-divider>
+      <el-descriptions :column="2" border>
+        <el-descriptions-item label="导师姓名">{{ currentTopic.teacherName }}</el-descriptions-item>
+        <el-descriptions-item label="导师工号">{{ currentTopic.teacherAccount }}</el-descriptions-item>
+        <el-descriptions-item label="申请时间">{{ currentTopic.applyTime || '无' }}</el-descriptions-item>
+      </el-descriptions>
+      
+      <el-divider content-position="left">系主任审核信息</el-divider>
+      <el-descriptions :column="2" border>
+        <el-descriptions-item label="系主任">{{ currentTopic.departmentheadName || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="系主任工号">{{ currentTopic.departmentheadAccount || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="审核状态">{{ getAuditStatusText(currentTopic.applyStatus) }}</el-descriptions-item>
+        <el-descriptions-item label="审核时间">{{ currentTopic.auditTime || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="审核意见" :span="2">{{ currentTopic.departmentheadOpinion || '无' }}</el-descriptions-item>
+      </el-descriptions>
+      
+      <el-divider content-position="left">学生选题信息</el-divider>
+      <el-descriptions :column="2" border>
+        <el-descriptions-item label="选题状态">{{ currentTopic.applyStatusStudent ? '已选题' : '未选题' }}</el-descriptions-item>
+        <el-descriptions-item label="学生姓名">{{ currentTopic.studentName || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="学生工号">{{ currentTopic.studentAccount || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="学生申请时间">{{ currentTopic.studentApplyTime || '无' }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
@@ -141,9 +161,9 @@ import { Refresh } from '@element-plus/icons-vue'
 
 // 搜索表单
 const searchForm = reactive({
-  projectName: '',
+  topicName: '',
   graduationTime: '',
-  deptAuditStatus: ''
+  applyStatus: ''
 })
 
 // 列表数据
@@ -159,8 +179,8 @@ const auditTitle = ref('课题审核')
 const submitLoading = ref(false)
 const auditForm = reactive({
   id: null,
-  deptAuditStatus: 1,
-  deptAuditRemark: ''
+  applyStatus: 1,
+  departmentheadOpinion: ''
 })
 
 // 详情对话框
@@ -174,7 +194,8 @@ const getTopicList = async () => {
     const response = await topicApi.getTopicSelection({
       teacherId: '', // 从 Token 自动获取
       graduationTime: searchForm.graduationTime || undefined,
-      deptAuditStatus: searchForm.deptAuditStatus !== '' ? searchForm.deptAuditStatus : undefined,
+      topicName: searchForm.topicName || undefined,
+      applyStatus: searchForm.applyStatus !== '' ? searchForm.applyStatus : undefined,
       pageNum: currentPage.value,
       pageSize: pageSize.value
     })
@@ -201,9 +222,9 @@ const handleSearch = () => {
 
 // 重置搜索
 const resetSearch = () => {
-  searchForm.projectName = ''
+  searchForm.topicName = ''
   searchForm.graduationTime = ''
-  searchForm.deptAuditStatus = ''
+  searchForm.applyStatus = ''
   currentPage.value = 1
   getTopicList()
 }
@@ -241,20 +262,40 @@ const handleDetail = (row) => {
 // 审核
 const handleAudit = (row, status) => {
   auditForm.id = row.id
-  auditForm.deptAuditStatus = status
-  auditForm.deptAuditRemark = ''
+  auditForm.applyStatus = status
+  auditForm.departmentheadOpinion = ''
   auditTitle.value = status === 1 ? '通过课题' : '驳回课题'
   auditDialogVisible.value = true
 }
 
 // 提交审核
 const submitAudit = async () => {
+  // 校验字段
+  if (!auditForm.id) {
+    ElMessage.error('课题ID不能为空')
+    return
+  }
+  if (!auditForm.departmentheadOpinion || auditForm.departmentheadOpinion.trim() === '') {
+    ElMessage.error('审核意见不能为空')
+    return
+  }
+  if (auditForm.applyStatus === null || auditForm.applyStatus === undefined) {
+    ElMessage.error('审核状态不能为空')
+    return
+  }
+
   submitLoading.value = true
   try {
-    const response = await topicApi.approve({
-      id: auditForm.id,
-      deptAuditStatus: auditForm.deptAuditStatus,
-      deptAuditRemark: auditForm.deptAuditRemark
+    // 使用表单数据格式提交
+    const formData = new URLSearchParams()
+    formData.append('id', auditForm.id)
+    formData.append('applyStatus', auditForm.applyStatus)
+    formData.append('departmentheadOpinion', auditForm.departmentheadOpinion)
+    
+    const response = await topicApi.approve(formData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
     })
     
     if (response?.status === 'success') {
@@ -290,5 +331,26 @@ onMounted(() => {
 
 .search-form {
   margin-bottom: 20px;
+}
+
+/* 课题列表文本居中 */
+:deep(.el-table th),
+:deep(.el-table td) {
+  text-align: center;
+}
+
+/* 详情表标题列一行完整展示 */
+:deep(.el-descriptions__label) {
+  white-space: nowrap;
+  min-width: 120px;
+}
+
+/* 确保详情表布局正确 */
+:deep(.el-descriptions__row) {
+  display: flex;
+}
+
+:deep(.el-descriptions__cell) {
+  flex: 0 0 auto;
 }
 </style>

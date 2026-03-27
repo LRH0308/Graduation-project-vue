@@ -95,6 +95,7 @@ const handleSubmit = async () => {
     if (!valid) return
     
     try {
+      // 直接传递表单数据，不包装
       const res = await topicApi.apply(topicForm)
       if (res?.status === 'success') {
         ElMessage.success('申请提交成功')

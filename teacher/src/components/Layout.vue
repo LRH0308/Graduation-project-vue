@@ -47,14 +47,15 @@
             <span>首页</span>
           </el-menu-item>
 
-          <el-sub-menu index="subject">
-            <template #title>
-              <el-icon><Document /></el-icon>
-              <span>选题管理</span>
-            </template>
-            <el-menu-item index="/subject/apply">课题申请</el-menu-item>
-            <el-menu-item index="/subject/list">课题列表</el-menu-item>
-          </el-sub-menu>
+          <el-menu-item index="/student/info">
+            <el-icon><User /></el-icon>
+            <span>指导学生</span>
+          </el-menu-item>
+
+          <el-menu-item index="/subject/manage">
+            <el-icon><Document /></el-icon>
+            <span>选题管理</span>
+          </el-menu-item>
 
           <el-menu-item index="/task/book">
             <el-icon><Reading /></el-icon>
@@ -111,6 +112,7 @@ import {
   Timer,
   Comment,
   SwitchButton,
+  User,
 } from "@element-plus/icons-vue";
 
 const router = useRouter();
@@ -120,7 +122,6 @@ const userStore = useUserStore();
 // 获取当前激活的菜单项
 const activeMenu = computed(() => {
   const path = route.path;
-  if (path.startsWith("/subject")) return "subject";
   if (path.startsWith("/defense")) return "defense";
   return path;
 });
