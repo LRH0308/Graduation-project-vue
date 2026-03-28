@@ -92,6 +92,9 @@ export const API = {
   // ==================== 文件管理 ====================
   FILE: {
     UPLOAD: { url: "/file/upload", method: "post" },
+    DOWNLOAD: { url: "/file/download", method: "get" },
+    GET_FILE_DETAIL: { url: "/file/getFileDetail", method: "post" },
+    GET_PREVIEW_URL: { url: "/file/getPreviewUrl", method: "post" },
   },
 };
 

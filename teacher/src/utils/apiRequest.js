@@ -152,6 +152,28 @@ export const fileApi = {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
+  // 下载文件
+  download: (fileId, config = {}) => {
+    return apiCall(API.FILE.DOWNLOAD, {}, {
+      ...config,
+      params: { fileId },
+      responseType: 'blob'
+    });
+  },
+  // 获取文件详情
+  getFileDetail: (fileId, config = {}) => {
+    return apiCall(API.FILE.GET_FILE_DETAIL, {}, {
+      ...config,
+      params: { fileId }
+    });
+  },
+  // 获取文件预览URL
+  getPreviewUrl: (fileId, config = {}) => {
+    return apiCall(API.FILE.GET_PREVIEW_URL, {}, {
+      ...config,
+      params: { fileId }
+    });
+  },
 };
 
 // ==================== 统一导出 ====================

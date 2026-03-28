@@ -34,16 +34,16 @@
       
       <!-- 课题列表 -->
       <el-table :data="topicList" v-loading="loading" border stripe>
-        <el-table-column type="index" label="序列" width="80" />
+        <el-table-column type="index" label="序列" width="60" />
         <el-table-column prop="topicName" label="课题名称" min-width="200" />
         <el-table-column prop="graduationTime" label="毕业时间" width="100" />
-        <el-table-column label="指导教师">
+        <el-table-column label="指导教师" width="120">
           <template #default="{ row }">
             {{ row.teacherAccount || '-' }}/{{ row.teacherName || '-' }}
           </template>
         </el-table-column>
         <el-table-column prop="deptName" label="所属系部" width="120" />
-        <el-table-column prop="applyStatus" label="审核状态" width="100">
+        <el-table-column prop="applyStatus" label="审核状态" width="90">
           <template #default="{ row }">
             <el-tag :type="getAuditStatusType(row.applyStatus)">
               {{ getAuditStatusText(row.applyStatus) }}
@@ -51,7 +51,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="auditTime" label="审核时间" width="160" />
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="100">
           <template #default="{ row }">
             <el-button type="primary" size="small" @click="handleDetail(row)">详情</el-button>
             <el-button 
