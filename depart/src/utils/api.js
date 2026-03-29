@@ -50,5 +50,6 @@ export const API = {
   FILE: {
     UPLOAD: { url: "/file/upload", method: "post" },
     DOWNLOAD: { url: "/file/download", method: "get" },
+    GET_FILE_DETAIL: { url: "/file/getFileDetail", method: "post" },
   },
 };

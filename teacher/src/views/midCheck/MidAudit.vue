@@ -13,9 +13,10 @@
           <el-input v-model="searchForm.studentName" placeholder="请输入学生姓名" />
         </el-form-item>
         <el-form-item label="审核状态">
-          <el-select v-model="searchForm.auditStatus" placeholder="请选择">
+          <el-select v-model="searchForm.auditStatus" placeholder="请选择" style="width: 120px">
             <el-option label="待审核" :value="0" />
             <el-option label="已通过" :value="1" />
+            <el-option label="已驳回" :value="2" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -26,19 +27,23 @@
       
       <!-- 列表 -->
       <el-table :data="midCheckList" v-loading="loading" border style="width: 100%">
-        <el-table-column prop="studentName" label="学生姓名" />
-        <el-table-column prop="studentAccount" label="学号" />
-        <el-table-column prop="topicName" label="课题名称" />
-        <el-table-column prop="submitTime" label="提交时间" />
-        <el-table-column prop="auditStatus" label="审核状态">
+        <el-table-column type="index" label="序号" width="60" />
+        <el-table-column label="学号/学生名" width="150">
+          <template #default="{ row }">
+            {{ row.studentAccount }}/{{ row.studentName }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="projectName" label="课题名称" />
+        <el-table-column prop="submitTime" label="提交时间" width="160"/>
+        <el-table-column prop="auditStatus" label="审核状态" width="100">
           <template #default="{ row }">
             <el-tag :type="getAuditStatusType(row.auditStatus)">
               {{ getAuditStatusText(row.auditStatus) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="score" label="得分" />
-        <el-table-column label="操作" width="200">
+        <el-table-column prop="auditTime" label="审核时间" width="160"/>
+        <el-table-column label="操作" width="250">
           <template #default="{ row }">
             <el-button size="small" @click="handleViewDetail(row)">详情</el-button>
             <el-button
@@ -48,6 +53,14 @@
               @click="handleAudit(row)"
             >
               审核
+            </el-button>
+            <el-button
+              v-if="row.fileId"
+              size="small"
+              type="success"
+              @click="downloadFileFromList(row)"
+            >
+              下载文件
             </el-button>
           </template>
         </el-table-column>
@@ -71,17 +84,19 @@
       <el-descriptions :column="1" border>
         <el-descriptions-item label="学生姓名">{{ currentMidCheck.studentName }}</el-descriptions-item>
         <el-descriptions-item label="学号">{{ currentMidCheck.studentAccount }}</el-descriptions-item>
-        <el-descriptions-item label="课题名称">{{ currentMidCheck.topicName }}</el-descriptions-item>
+        <el-descriptions-item label="院系">{{ currentMidCheck.deptName || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="课题名称">{{ currentMidCheck.projectName || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="导师">{{ currentMidCheck.teacherAccount }}/{{ currentMidCheck.teacherName }}</el-descriptions-item>
         <el-descriptions-item label="提交时间">{{ currentMidCheck.submitTime }}</el-descriptions-item>
         <el-descriptions-item label="审核状态">{{ getAuditStatusText(currentMidCheck.auditStatus) }}</el-descriptions-item>
-        <el-descriptions-item label="得分">{{ currentMidCheck.score || '未评分' }}</el-descriptions-item>
+        <el-descriptions-item label="审核时间">{{ currentMidCheck.auditTime || '无' }}</el-descriptions-item>
         <el-descriptions-item label="审核意见" :span="2">
           {{ currentMidCheck.auditRemark || '无' }}
         </el-descriptions-item>
       </el-descriptions>
       
       <div style="margin-top: 20px;">
-        <el-button type="primary" @click="downloadFile">下载中期报告</el-button>
+        <el-button type="primary" @click="downloadFile">下载中期检查</el-button>
       </div>
       
       <template #footer>
@@ -95,16 +110,8 @@
         <el-form-item label="审核结果">
           <el-radio-group v-model="auditForm.auditStatus">
             <el-radio :label="1">通过</el-radio>
+            <el-radio :label="2">驳回</el-radio>
           </el-radio-group>
-        </el-form-item>
-        <el-form-item label="评分">
-          <el-input-number
-            v-model="auditForm.score"
-            :min="0"
-            :max="100"
-            :precision="1"
-            style="width: 100%;"
-          />
         </el-form-item>
         <el-form-item label="审核意见">
           <el-input
@@ -126,7 +133,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { midtermCheckApi } from '@/utils/apiRequest'
+import { midtermCheckApi, fileApi } from '@/utils/apiRequest'
 
 // 搜索表单
 const searchForm = reactive({
@@ -150,7 +157,6 @@ const auditDialogVisible = ref(false)
 const auditForm = reactive({
   id: null,
   auditStatus: 1,
-  score: 80,
   auditRemark: ''
 })
 
@@ -168,33 +174,17 @@ const getMidCheckList = async () => {
       midCheckList.value = response.data?.records || response.data?.list || []
       total.value = response.data?.total || 0
     } else {
-      useMockData()
+      midCheckList.value = []
+      total.value = 0
     }
   } catch (error) {
     console.error('获取中期检查列表失败:', error)
     ElMessage.error('获取中期检查列表失败')
-    useMockData()
+    midCheckList.value = []
+    total.value = 0
   } finally {
     loading.value = false
   }
-}
-
-// 使用模拟数据
-const useMockData = () => {
-  midCheckList.value = [
-    {
-      id: 1,
-      studentName: '张三',
-      studentAccount: '2020001',
-      topicName: '基于 Spring Boot 的毕设管理系统',
-      submitTime: '2025-04-01 10:00:00',
-      auditStatus: 0,
-      auditRemark: null,
-      score: null,
-      fileId: 12
-    }
-  ]
-  total.value = midCheckList.value.length
 }
 
 // 处理搜索
@@ -221,7 +211,6 @@ const handleViewDetail = (row) => {
 const handleAudit = (row) => {
   auditForm.id = row.id
   auditForm.auditStatus = 1
-  auditForm.score = 80
   auditForm.auditRemark = ''
   auditDialogVisible.value = true
 }
@@ -241,24 +230,96 @@ const submitAudit = async () => {
 }
 
 // 下载文件
-const downloadFile = () => {
-  if (currentMidCheck.value.fileId) {
-    ElMessage.info('开始下载文件...')
-    // TODO: 实现文件下载逻辑
-  } else {
+const downloadFile = async () => {
+  if (!currentMidCheck.value.fileId) {
     ElMessage.warning('暂无可下载文件')
+    return
+  }
+  
+  try {
+    ElMessage.info('正在下载文件...')
+    // 获取文件详情
+    const detailRes = await fileApi.getFileDetail(currentMidCheck.value.fileId)
+    if (detailRes?.code !== 200 || !detailRes.data) {
+      ElMessage.error('获取文件信息失败')
+      return
+    }
+    
+    const fileInfo = detailRes.data
+    
+    // 下载文件
+    const response = await fileApi.download(currentMidCheck.value.fileId)
+    
+    // 创建Blob并下载
+    const blob = new Blob([response], { 
+      type: fileInfo.fileType || 'application/octet-stream' 
+    })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileInfo.fileName || '下载文件'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    
+    ElMessage.success('文件下载成功')
+  } catch (error) {
+    console.error('下载文件失败:', error)
+    ElMessage.error('下载文件失败，请重试')
+  }
+}
+
+// 从列表下载文件
+const downloadFileFromList = async (row) => {
+  if (!row.fileId) {
+    ElMessage.warning('暂无可下载文件')
+    return
+  }
+  
+  try {
+    ElMessage.info('正在下载文件...')
+    // 获取文件详情
+    const detailRes = await fileApi.getFileDetail(row.fileId)
+    if (detailRes?.code !== 200 || !detailRes.data) {
+      ElMessage.error('获取文件信息失败')
+      return
+    }
+    
+    const fileInfo = detailRes.data
+    
+    // 下载文件
+    const response = await fileApi.download(row.fileId)
+    
+    // 创建Blob并下载
+    const blob = new Blob([response], { 
+      type: fileInfo.fileType || 'application/octet-stream' 
+    })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileInfo.fileName || '下载文件'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    
+    ElMessage.success('文件下载成功')
+  } catch (error) {
+    console.error('下载文件失败:', error)
+    ElMessage.error('下载文件失败，请重试')
   }
 }
 
 // 获取状态文本
 const getAuditStatusText = (status) => {
-  const map = { 0: '待审核', 1: '审核通过' }
+  const map = { 0: '待审核', 1: '审核通过', 2: '审核驳回' }
   return map[status] || '未知'
 }
 
 // 获取状态类型
 const getAuditStatusType = (status) => {
-  const map = { 0: 'warning', 1: 'success' }
+  const map = { 0: 'warning', 1: 'success', 2: 'danger' }
   return map[status] || 'info'
 }
 
@@ -278,5 +339,11 @@ onMounted(() => {
 
 .search-form {
   margin-bottom: 20px;
+}
+
+/* 表格文本居中 */
+:deep(.el-table th),
+:deep(.el-table td) {
+  text-align: center;
 }
 </style>

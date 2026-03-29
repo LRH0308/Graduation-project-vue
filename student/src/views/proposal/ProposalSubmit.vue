@@ -86,52 +86,28 @@
           </div>
         </div>
 
-        <!-- 提交表单（未提交时显示） -->
-        <el-form
-          v-else
-          ref="proposalFormRef"
-          :model="proposalForm"
-          :rules="formRules"
-          label-width="100px"
-          class="proposal-form"
-        >
-          <el-form-item label="上传文件" prop="file">
-            <el-upload
-              ref="uploadRef"
-              :http-request="handleFileUpload"
-              :show-file-list="true"
-              :limit="1"
-              :before-upload="beforeUpload"
-              :on-remove="handleFileRemove"
-              accept=".doc,.docx,.pdf"
-            >
-              <el-button type="primary">
-                <el-icon><Upload /></el-icon>
-                选择文件
+        <!-- 无开题报告信息时 -->
+        <div v-else-if="!loading" class="no-proposal-section">
+          <el-empty description="暂无开题报告信息">
+            <div class="empty-actions">
+              <el-upload
+                ref="uploadRef"
+                :http-request="handleFileUpload"
+                :show-file-list="false"
+                :before-upload="beforeUpload"
+                accept=".doc,.docx,.pdf"
+              >
+                <el-button type="primary" :loading="uploading">
+                  <el-icon><Upload /></el-icon>
+                  提交开题报告
+                </el-button>
+              </el-upload>
+              <el-button type="default" @click="goToTaskBook">
+                查看任务书
               </el-button>
-            </el-upload>
-            <p class="tips">支持格式：doc, docx, pdf，最大 50MB</p>
-          </el-form-item>
-          <el-form-item>
-            <el-button
-              type="primary"
-              @click="handleSubmit"
-              :loading="submitting"
-            >
-              提交
-            </el-button>
-            <el-button @click="handleReset">重置</el-button>
-          </el-form-item>
-        </el-form>
-
-        <el-empty
-          v-if="!proposalInfo.id && !loading"
-          description="暂无开题报告信息"
-        >
-          <el-button type="primary" @click="goToTaskBook"
-            >去查看任务书</el-button
-          >
-        </el-empty>
+            </div>
+          </el-empty>
+        </div>
       </div>
     </el-card>
   </div>
@@ -152,20 +128,7 @@ const loading = ref(false);
 const uploading = ref(false);
 const submitting = ref(false);
 
-const proposalForm = reactive({
-  researchBackground: "",
-  researchStatus: "",
-  researchContent: "",
-  technicalRoute: "",
-  innovation: "",
-  schedule: "",
-  references: "",
-});
-
-const formRules = {};
-
 const uploadFile = ref(null);
-const uploadFileId = ref(null);
 
 // 判断是否可以上传（未提交或审核驳回时）
 const canUpload = computed(() => {
@@ -243,7 +206,7 @@ const beforeUpload = (file) => {
   return true;
 };
 
-// 处理文件上传
+// 处理文件上传并提交开题报告
 const handleFileUpload = async (param) => {
   uploading.value = true;
   try {
@@ -256,61 +219,31 @@ const handleFileUpload = async (param) => {
     });
 
     if (uploadRes?.status === "success" && uploadRes.data) {
-      uploadFile.value = file;
-      uploadFileId.value = uploadRes.data.id;
-      ElMessage.success("文件上传成功");
+      const fileId = uploadRes.data.id;
+      
+      // 直接提交开题报告
+      const submitRes = await openingReportApi.studentApply({
+        fileId: fileId,
+      });
+
+      if (submitRes?.status === "success" && submitRes.code === 200) {
+        ElMessage.success("开题报告提交成功");
+        await getProposalInfo();
+      } else {
+        ElMessage.error(submitRes?.info || "提交失败");
+        return Promise.reject(new Error("提交失败"));
+      }
     } else {
       ElMessage.error(uploadRes?.info || "文件上传失败");
       return Promise.reject(new Error("上传失败"));
     }
   } catch (error) {
-    console.error("文件上传失败:", error);
-    ElMessage.error("文件上传失败");
+    console.error("提交失败:", error);
+    ElMessage.error("提交失败，请重试");
     return Promise.reject(error);
   } finally {
     uploading.value = false;
   }
-};
-
-// 处理文件移除
-const handleFileRemove = () => {
-  uploadFile.value = null;
-  uploadFileId.value = null;
-};
-
-// 提交开题报告
-const handleSubmit = async () => {
-  if (!proposalFormRef.value) return;
-
-  await proposalFormRef.value.validate(async (valid) => {
-    if (!valid) return;
-
-    if (!uploadFileId.value) {
-      ElMessage.warning("请先上传文件");
-      return;
-    }
-
-    submitting.value = true;
-    try {
-      // 调用实际接口：POST /openingReport/studentApply
-      const res = await openingReportApi.studentApply({
-        fileId: uploadFileId.value,
-      });
-
-      if (res?.status === "success" && res.code === 200) {
-        ElMessage.success("开题报告提交成功");
-        await getProposalInfo();
-        handleReset();
-      } else {
-        ElMessage.error(res?.info || "提交失败");
-      }
-    } catch (error) {
-      console.error("提交失败:", error);
-      ElMessage.error("提交失败，请重试");
-    } finally {
-      submitting.value = false;
-    }
-  });
 };
 
 // 重新提交
@@ -331,33 +264,43 @@ const handleResubmit = () => {
 };
 
 // 下载文件
-const downloadFile = () => {
-  if (proposalInfo.value.fileId) {
-    // 调用文件下载接口
-    ElMessage.info("开始下载文件...");
-    // 示例：window.open(`/api/file/download/${proposalInfo.value.fileId}`);
-  } else {
+const downloadFile = async () => {
+  if (!proposalInfo.value.fileId) {
     ElMessage.warning("暂无可下载文件");
+    return;
   }
-};
-
-// 重置表单
-const handleReset = () => {
-  proposalForm.researchBackground = "";
-  proposalForm.researchStatus = "";
-  proposalForm.researchContent = "";
-  proposalForm.technicalRoute = "";
-  proposalForm.innovation = "";
-  proposalForm.schedule = "";
-  proposalForm.references = "";
-  uploadFile.value = null;
-  uploadFileId.value = null;
-
-  if (proposalFormRef.value) {
-    proposalFormRef.value.clearValidate();
-  }
-  if (uploadRef.value) {
-    uploadRef.value.clearFiles();
+  
+  try {
+    ElMessage.info("正在下载文件...");
+    // 获取文件详情
+    const detailRes = await fileApi.getFileDetail(proposalInfo.value.fileId);
+    if (detailRes?.status !== "success" || !detailRes.data) {
+      ElMessage.error("获取文件信息失败");
+      return;
+    }
+    
+    const fileInfo = detailRes.data;
+    
+    // 下载文件
+    const response = await fileApi.download(proposalInfo.value.fileId);
+    
+    // 创建Blob并下载
+    const blob = new Blob([response], { 
+      type: fileInfo.fileType || 'application/octet-stream' 
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileInfo.fileName || `开题报告_${proposalInfo.value.projectName || '未命名'}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    ElMessage.success("文件下载成功");
+  } catch (error) {
+    console.error("下载文件失败:", error);
+    ElMessage.error("下载文件失败，请重试");
   }
 };
 
@@ -455,5 +398,17 @@ onMounted(() => {
   font-size: 12px;
   color: #999;
   margin-top: 5px;
+}
+
+/* 无开题报告时的按钮布局 */
+.empty-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.empty-actions .el-button {
+  margin: 0;
 }
 </style>

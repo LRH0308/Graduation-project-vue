@@ -82,3 +82,23 @@ export const defenseApi = {
   deptArrange: (data, config = {}) =>
     apiCall(API.DEFENSE_ARRANGEMENT.DEPT_ARRANGE, data, config),
 };
+
+// ==================== 文件管理接口 ====================
+
+export const fileApi = {
+  // 下载文件
+  download: (fileId, config = {}) => {
+    return apiCall(API.FILE.DOWNLOAD, {}, {
+      ...config,
+      params: { fileId },
+      responseType: 'blob'
+    });
+  },
+  // 获取文件详情
+  getFileDetail: (fileId, config = {}) => {
+    return apiCall(API.FILE.GET_FILE_DETAIL, {}, {
+      ...config,
+      params: { fileId }
+    });
+  },
+};

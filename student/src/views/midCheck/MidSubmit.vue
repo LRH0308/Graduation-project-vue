@@ -86,51 +86,28 @@
           </div>
         </div>
 
-        <!-- 提交表单（未提交时显示） -->
-        <el-form
-          v-else
-          ref="midFormRef"
-          :model="midForm"
-          label-width="100px"
-          class="mid-form"
-        >
-          <el-form-item label="上传文件" required>
-            <el-upload
-              ref="uploadRef"
-              :http-request="handleFileUpload"
-              :show-file-list="true"
-              :limit="1"
-              :before-upload="beforeUpload"
-              :on-remove="handleFileRemove"
-              accept=".doc,.docx,.pdf,.zip,.rar"
-            >
-              <el-button type="primary">
-                <el-icon><Upload /></el-icon>
-                选择文件
+        <!-- 无中期检查信息时 -->
+        <div v-else-if="!loading" class="no-mid-section">
+          <el-empty description="暂无中期检查信息">
+            <div class="empty-actions">
+              <el-upload
+                ref="uploadRef"
+                :http-request="handleFileUpload"
+                :show-file-list="false"
+                :before-upload="beforeUpload"
+                accept=".doc,.docx,.pdf,.zip,.rar"
+              >
+                <el-button type="primary" :loading="uploading">
+                  <el-icon><Upload /></el-icon>
+                  提交中期检查
+                </el-button>
+              </el-upload>
+              <el-button type="default" @click="goToProposal">
+                查看开题报告
               </el-button>
-            </el-upload>
-            <p class="tips">支持格式：doc, docx, pdf, zip, rar，最大 50MB</p>
-          </el-form-item>
-          <el-form-item>
-            <el-button
-              type="primary"
-              @click="handleSubmit"
-              :loading="submitting"
-            >
-              提交
-            </el-button>
-            <el-button @click="handleReset">重置</el-button>
-          </el-form-item>
-        </el-form>
-
-        <el-empty
-          v-if="!midCheckInfo.id && !loading"
-          description="暂无中期检查信息"
-        >
-          <el-button type="primary" @click="goToProposal"
-            >去查看开题报告</el-button
-          >
-        </el-empty>
+            </div>
+          </el-empty>
+        </div>
       </div>
     </el-card>
   </div>
@@ -150,16 +127,6 @@ const midCheckInfo = ref({});
 const loading = ref(false);
 const uploading = ref(false);
 const submitting = ref(false);
-
-const midForm = reactive({
-  completedWork: "",
-  achievements: "",
-  problems: "",
-  plan: "",
-});
-
-const uploadFile = ref(null);
-const uploadFileId = ref(null);
 
 // 判断是否可以上传（未提交或审核驳回时）
 const canUpload = computed(() => {
@@ -239,7 +206,7 @@ const beforeUpload = (file) => {
   return true;
 };
 
-// 处理文件上传
+// 处理文件上传并提交中期检查
 const handleFileUpload = async (param) => {
   uploading.value = true;
   try {
@@ -252,54 +219,30 @@ const handleFileUpload = async (param) => {
     });
 
     if (uploadRes?.status === "success" && uploadRes.data) {
-      uploadFile.value = file;
-      uploadFileId.value = uploadRes.data.id;
-      ElMessage.success("文件上传成功");
+      const fileId = uploadRes.data.id;
+      
+      // 直接提交中期检查
+      const submitRes = await midtermCheckApi.studentApply({
+        fileId: fileId,
+      });
+
+      if (submitRes?.status === "success" && submitRes.code === 200) {
+        ElMessage.success("中期检查提交成功");
+        await getMidCheckInfo();
+      } else {
+        ElMessage.error(submitRes?.info || "提交失败");
+        return Promise.reject(new Error("提交失败"));
+      }
     } else {
       ElMessage.error(uploadRes?.info || "文件上传失败");
       return Promise.reject(new Error("上传失败"));
     }
   } catch (error) {
-    console.error("文件上传失败:", error);
-    ElMessage.error("文件上传失败");
+    console.error("提交失败:", error);
+    ElMessage.error("提交失败，请重试");
     return Promise.reject(error);
   } finally {
     uploading.value = false;
-  }
-};
-
-// 处理文件移除
-const handleFileRemove = () => {
-  uploadFile.value = null;
-  uploadFileId.value = null;
-};
-
-// 提交中期检查
-const handleSubmit = async () => {
-  if (!uploadFileId.value) {
-    ElMessage.warning("请先上传文件");
-    return;
-  }
-
-  submitting.value = true;
-  try {
-    // 调用实际接口：POST /midtermCheck/studentApply
-    const res = await midtermCheckApi.studentApply({
-      fileId: uploadFileId.value,
-    });
-
-    if (res?.status === "success" && res.code === 200) {
-      ElMessage.success("中期检查提交成功");
-      await getMidCheckInfo();
-      handleReset();
-    } else {
-      ElMessage.error(res?.info || "提交失败");
-    }
-  } catch (error) {
-    console.error("提交失败:", error);
-    ElMessage.error("提交失败，请重试");
-  } finally {
-    submitting.value = false;
   }
 };
 
@@ -321,30 +264,43 @@ const handleResubmit = () => {
 };
 
 // 下载文件
-const downloadFile = () => {
-  if (midCheckInfo.value.fileId) {
-    // 调用文件下载接口
-    ElMessage.info("开始下载文件...");
-    // 示例：window.open(`/api/file/download/${midCheckInfo.value.fileId}`);
-  } else {
+const downloadFile = async () => {
+  if (!midCheckInfo.value.fileId) {
     ElMessage.warning("暂无可下载文件");
+    return;
   }
-};
-
-// 重置表单
-const handleReset = () => {
-  midForm.completedWork = "";
-  midForm.achievements = "";
-  midForm.problems = "";
-  midForm.plan = "";
-  uploadFile.value = null;
-  uploadFileId.value = null;
-
-  if (midFormRef.value) {
-    midFormRef.value.clearValidate();
-  }
-  if (uploadRef.value) {
-    uploadRef.value.clearFiles();
+  
+  try {
+    ElMessage.info("正在下载文件...");
+    // 获取文件详情
+    const detailRes = await fileApi.getFileDetail(midCheckInfo.value.fileId);
+    if (detailRes?.status !== "success" || !detailRes.data) {
+      ElMessage.error("获取文件信息失败");
+      return;
+    }
+    
+    const fileInfo = detailRes.data;
+    
+    // 下载文件
+    const response = await fileApi.download(midCheckInfo.value.fileId);
+    
+    // 创建Blob并下载
+    const blob = new Blob([response], { 
+      type: fileInfo.fileType || 'application/octet-stream' 
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileInfo.fileName || `中期检查_${midCheckInfo.value.projectName || '未命名'}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    ElMessage.success("文件下载成功");
+  } catch (error) {
+    console.error("下载文件失败:", error);
+    ElMessage.error("下载文件失败，请重试");
   }
 };
 
@@ -402,12 +358,6 @@ onMounted(() => {
   margin: 0;
 }
 
-.audit-score {
-  margin-top: 10px;
-  color: #67c23a;
-  font-weight: 600;
-}
-
 /* 审核信息区域 */
 .audit-section h4 {
   margin: 10px 0;
@@ -438,15 +388,15 @@ onMounted(() => {
   margin: 0;
 }
 
-/* 表单样式 */
-.mid-form {
-  max-width: 800px;
-  margin: 0 auto;
+/* 无中期检查时的按钮布局 */
+.empty-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
 }
 
-.tips {
-  font-size: 12px;
-  color: #999;
-  margin-top: 5px;
+.empty-actions .el-button {
+  margin: 0;
 }
 </style>

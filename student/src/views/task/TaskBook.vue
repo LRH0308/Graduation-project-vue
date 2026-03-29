@@ -217,13 +217,43 @@ const uploadFile = async (param) => {
 };
 
 // 下载文件
-const downloadFile = () => {
-  if (taskBook.value.fileId) {
-    ElMessage.info("开始下载任务书...");
-    // TODO: 实现文件下载逻辑，调用文件下载接口
-    // 示例：window.open(`/api/file/download/${taskBook.value.fileId}`);
-  } else {
-    ElMessage.warning("暂无可下载文件，请先上传");
+const downloadFile = async () => {
+  if (!taskBook.value.fileId) {
+    ElMessage.warning("暂无可下载文件");
+    return;
+  }
+  
+  try {
+    ElMessage.info("正在下载文件...");
+    // 获取文件详情
+    const detailRes = await fileApi.getFileDetail(taskBook.value.fileId);
+    if (detailRes?.status !== "success" || !detailRes.data) {
+      ElMessage.error("获取文件信息失败");
+      return;
+    }
+    
+    const fileInfo = detailRes.data;
+    
+    // 下载文件
+    const response = await fileApi.download(taskBook.value.fileId);
+    
+    // 创建Blob并下载
+    const blob = new Blob([response], { 
+      type: fileInfo.fileType || 'application/octet-stream' 
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileInfo.fileName || `任务书_${taskBook.value.projectName || '未命名'}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    ElMessage.success("文件下载成功");
+  } catch (error) {
+    console.error("下载文件失败:", error);
+    ElMessage.error("下载文件失败，请重试");
   }
 };
 

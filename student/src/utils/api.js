@@ -110,8 +110,10 @@ export const API = {
   FILE: {
     // 上传文件 POST /file/upload
     UPLOAD: { url: "/file/upload", method: "post" },
-    // 下载文件 GET /file/download/{fileId}
+    // 下载文件 GET /file/download
     DOWNLOAD: { url: "/file/download", method: "get" },
+    // 获取文件详情 POST /file/getFileDetail
+    GET_FILE_DETAIL: { url: "/file/getFileDetail", method: "post" },
   },
 };
 

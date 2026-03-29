@@ -162,16 +162,28 @@ export const fileApi = {
       method: API.FILE.UPLOAD.method,
       data: formData,
       isForm: false,
+      headers: { "Content-Type": "multipart/form-data" },
       ...config,
     });
   },
 
-  // 下载文件（需要 Token）GET /file/download/{fileId}
+  // 下载文件（需要 Token）GET /file/download
   download: (fileId, config = {}) => {
     return request({
-      url: `${API.FILE.DOWNLOAD.url}/${fileId}`,
+      url: API.FILE.DOWNLOAD.url,
       method: API.FILE.DOWNLOAD.method,
+      params: { fileId },
       responseType: "blob",
+      ...config,
+    });
+  },
+
+  // 获取文件详情（需要 Token）POST /file/getFileDetail
+  getFileDetail: (fileId, config = {}) => {
+    return request({
+      url: API.FILE.GET_FILE_DETAIL.url,
+      method: API.FILE.GET_FILE_DETAIL.method,
+      params: { fileId },
       ...config,
     });
   },

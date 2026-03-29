@@ -13,7 +13,7 @@
           <el-input v-model="searchForm.studentName" placeholder="请输入学生姓名" />
         </el-form-item>
         <el-form-item label="审核状态">
-          <el-select v-model="searchForm.auditStatus" placeholder="请选择">
+          <el-select v-model="searchForm.auditStatus" placeholder="请选择" style="width: 120px">
             <el-option label="待审核" :value="0" />
             <el-option label="已通过" :value="1" />
             <el-option label="已驳回" :value="2" />
@@ -27,18 +27,23 @@
       
       <!-- 列表 -->
       <el-table :data="proposalList" v-loading="loading" border style="width: 100%">
-        <el-table-column prop="studentName" label="学生姓名" />
-        <el-table-column prop="studentAccount" label="学号" />
-        <el-table-column prop="topicName" label="课题名称" />
-        <el-table-column prop="submitTime" label="提交时间" />
-        <el-table-column prop="auditStatus" label="审核状态">
+        <el-table-column type="index" label="序号" width="60" />
+        <el-table-column label="学号/学生名" width="150">
+          <template #default="{ row }">
+            {{ row.studentAccount }}/{{ row.studentName }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="projectName" label="课题名称" />
+        <el-table-column prop="submitTime" label="提交时间" width="160"/>
+        <el-table-column prop="auditStatus" label="审核状态" width="100">
           <template #default="{ row }">
             <el-tag :type="getAuditStatusType(row.auditStatus)">
               {{ getAuditStatusText(row.auditStatus) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200">
+        <el-table-column prop="auditTime" label="审核时间" width="160"/>
+        <el-table-column label="操作" width="250">
           <template #default="{ row }">
             <el-button size="small" @click="handleViewDetail(row)">详情</el-button>
             <el-button
@@ -48,6 +53,14 @@
               @click="handleAudit(row)"
             >
               审核
+            </el-button>
+            <el-button
+              v-if="row.fileId"
+              size="small"
+              type="success"
+              @click="downloadFileFromList(row)"
+            >
+              下载文件
             </el-button>
           </template>
         </el-table-column>
@@ -71,9 +84,12 @@
       <el-descriptions :column="1" border>
         <el-descriptions-item label="学生姓名">{{ currentProposal.studentName }}</el-descriptions-item>
         <el-descriptions-item label="学号">{{ currentProposal.studentAccount }}</el-descriptions-item>
-        <el-descriptions-item label="课题名称">{{ currentProposal.topicName }}</el-descriptions-item>
+        <el-descriptions-item label="院系">{{ currentProposal.deptName || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="课题名称">{{ currentProposal.projectName || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="导师">{{ currentProposal.teacherAccount }}/{{ currentProposal.teacherName }}</el-descriptions-item>
         <el-descriptions-item label="提交时间">{{ currentProposal.submitTime }}</el-descriptions-item>
         <el-descriptions-item label="审核状态">{{ getAuditStatusText(currentProposal.auditStatus) }}</el-descriptions-item>
+        <el-descriptions-item label="审核时间">{{ currentProposal.auditTime || '无' }}</el-descriptions-item>
         <el-descriptions-item label="审核意见" :span="2">
           {{ currentProposal.auditRemark || '无' }}
         </el-descriptions-item>
@@ -174,13 +190,21 @@ const useMockData = () => {
   proposalList.value = [
     {
       id: 1,
-      studentName: '张三',
+      deptName: '软件工程系',
+      projectName: '基于 Spring Boot 的毕设管理系统',
+      fileId: 11,
+      studentId: 1,
       studentAccount: '2020001',
-      topicName: '基于 Spring Boot 的毕设管理系统',
+      studentName: '张三',
       submitTime: '2025-03-10 14:00:00',
       auditStatus: 0,
+      teacherId: 1,
+      teacherAccount: 'T001',
+      teacherName: '赵老师',
+      auditTime: null,
       auditRemark: null,
-      fileId: 11
+      createTime: '2025-03-10 14:00:00',
+      updateTime: null
     }
   ]
   total.value = proposalList.value.length
@@ -229,12 +253,84 @@ const submitAudit = async () => {
 }
 
 // 下载文件
-const downloadFile = () => {
-  if (currentProposal.value.fileId) {
-    ElMessage.info('开始下载文件...')
-    // TODO: 实现文件下载逻辑
-  } else {
+const downloadFile = async () => {
+  if (!currentProposal.value.fileId) {
     ElMessage.warning('暂无可下载文件')
+    return
+  }
+  
+  try {
+    ElMessage.info('正在下载文件...')
+    // 获取文件详情
+    const detailRes = await fileApi.getFileDetail(currentProposal.value.fileId)
+    if (detailRes?.code !== 200 || !detailRes.data) {
+      ElMessage.error('获取文件信息失败')
+      return
+    }
+    
+    const fileInfo = detailRes.data
+    
+    // 下载文件
+    const response = await fileApi.download(currentProposal.value.fileId)
+    
+    // 创建Blob并下载
+    const blob = new Blob([response], { 
+      type: fileInfo.fileType || 'application/octet-stream' 
+    })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileInfo.fileName || '下载文件'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    
+    ElMessage.success('文件下载成功')
+  } catch (error) {
+    console.error('下载文件失败:', error)
+    ElMessage.error('下载文件失败，请重试')
+  }
+}
+
+// 从列表下载文件
+const downloadFileFromList = async (row) => {
+  if (!row.fileId) {
+    ElMessage.warning('暂无可下载文件')
+    return
+  }
+  
+  try {
+    ElMessage.info('正在下载文件...')
+    // 获取文件详情
+    const detailRes = await fileApi.getFileDetail(row.fileId)
+    if (detailRes?.code !== 200 || !detailRes.data) {
+      ElMessage.error('获取文件信息失败')
+      return
+    }
+    
+    const fileInfo = detailRes.data
+    
+    // 下载文件
+    const response = await fileApi.download(row.fileId)
+    
+    // 创建Blob并下载
+    const blob = new Blob([response], { 
+      type: fileInfo.fileType || 'application/octet-stream' 
+    })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileInfo.fileName || '下载文件'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    
+    ElMessage.success('文件下载成功')
+  } catch (error) {
+    console.error('下载文件失败:', error)
+    ElMessage.error('下载文件失败，请重试')
   }
 }
 
@@ -266,5 +362,11 @@ onMounted(() => {
 
 .search-form {
   margin-bottom: 20px;
+}
+
+/* 表格文本居中 */
+:deep(.el-table th),
+:deep(.el-table td) {
+  text-align: center;
 }
 </style>

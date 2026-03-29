@@ -20,7 +20,7 @@
 
           <div class="info-grid">
             <span class="grid-label">系部</span>
-            <span class="grid-value">{{ userStore.userInfo?.department || "-" }}</span>
+            <span class="grid-value">{{ userStore.userInfo?.deptName || "-" }}</span>
           </div>
         </div>
 

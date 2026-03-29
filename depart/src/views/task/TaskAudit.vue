@@ -115,9 +115,7 @@
     <!-- 详情对话框 -->
     <el-dialog v-model="detailDialogVisible" title="任务书详情" width="700px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="ID">{{ currentTask.id }}</el-descriptions-item>
         <el-descriptions-item label="课题名称">{{ currentTask.projectName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="文件ID">{{ currentTask.fileId || '-' }}</el-descriptions-item>
         <el-descriptions-item label="所属系部">{{ currentTask.deptName || '-' }}</el-descriptions-item>
       </el-descriptions>
       
@@ -152,6 +150,17 @@
         <el-descriptions-item label="审核时间">{{ currentTask.auditTime || '-' }}</el-descriptions-item>
         <el-descriptions-item label="审核意见" :span="2">{{ currentTask.auditRemark || '-' }}</el-descriptions-item>
       </el-descriptions>
+      
+      <div style="margin-top: 20px;">
+        <el-button 
+          v-if="currentTask.fileId" 
+          type="primary" 
+          @click="downloadFile(currentTask)"
+        >
+          下载文件
+        </el-button>
+      </div>
+      
       <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
       </template>
@@ -162,7 +171,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { taskBookApi } from '@/utils/apiRequest'
+import { taskBookApi, fileApi } from '@/utils/apiRequest'
 import { Refresh } from '@element-plus/icons-vue'
 
 // 搜索表单
@@ -184,6 +193,7 @@ const auditTitle = ref('任务书审核')
 const submitLoading = ref(false)
 const auditForm = reactive({
   id: null,
+  fileId: null,
   auditStatus: 1,
   auditRemark: ''
 })
@@ -252,6 +262,7 @@ const handleDetail = (row) => {
 // 审核
 const handleAudit = (row, status) => {
   auditForm.id = row.id
+  auditForm.fileId = row.fileId
   auditForm.auditStatus = status
   auditForm.auditRemark = ''
   auditTitle.value = status === 1 ? '通过任务书' : '驳回任务书'
@@ -264,6 +275,7 @@ const submitAudit = async () => {
   try {
     const response = await taskBookApi.departApprove({
       id: auditForm.id,
+      fileId: auditForm.fileId,
       auditStatus: auditForm.auditStatus,
       auditRemark: auditForm.auditRemark
     })
@@ -280,6 +292,47 @@ const submitAudit = async () => {
     ElMessage.error('审核失败')
   } finally {
     submitLoading.value = false
+  }
+}
+
+// 下载文件
+const downloadFile = async (row) => {
+  if (!row.fileId) {
+    ElMessage.warning('暂无可下载文件')
+    return
+  }
+  
+  try {
+    ElMessage.info('正在下载文件...')
+    // 获取文件详情
+    const detailRes = await fileApi.getFileDetail(row.fileId)
+    if (detailRes?.status !== 'success' || !detailRes.data) {
+      ElMessage.error('获取文件信息失败')
+      return
+    }
+    
+    const fileInfo = detailRes.data
+    
+    // 下载文件
+    const response = await fileApi.download(row.fileId)
+    
+    // 创建Blob并下载
+    const blob = new Blob([response], { 
+      type: fileInfo.fileType || 'application/octet-stream' 
+    })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileInfo.fileName || `任务书_${row.studentName}_${row.projectName || '未命名'}.pdf`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    
+    ElMessage.success('文件下载成功')
+  } catch (error) {
+    console.error('下载文件失败:', error)
+    ElMessage.error('下载文件失败，请重试')
   }
 }
 

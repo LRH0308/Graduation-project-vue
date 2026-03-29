@@ -90,15 +90,15 @@ request.interceptors.request.use(
       config.headers.token = token;
     }
 
-    // 设置 Content-Type
-    if (!config.headers["Content-Type"]) {
+    // 设置 Content-Type (跳过 FormData)
+    if (!config.headers["Content-Type"] && !(config.data instanceof FormData)) {
       config.headers["Content-Type"] = config.isForm
         ? CONTENT_TYPE_FORM
         : CONTENT_TYPE_JSON;
     }
 
     // 表单数据序列化
-    if (config.isForm && config.data) {
+    if (config.isForm && config.data && !(config.data instanceof FormData)) {
       const params = new URLSearchParams();
       Object.keys(config.data).forEach((key) => {
         params.append(key, config.data[key] ?? "");
@@ -107,6 +107,7 @@ request.interceptors.request.use(
     } else if (
       config.data &&
       Object.keys(config.data).length > 0 &&
+      !(config.data instanceof FormData) &&
       config.headers["Content-Type"]?.includes("json")
     ) {
       config.data = JSON.stringify(config.data);
