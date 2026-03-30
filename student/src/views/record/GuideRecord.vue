@@ -1,5 +1,5 @@
 <template>
-  <div class="guide-record-container">
+  <div class="subject-list-container">
     <el-card>
       <template #header>
         <div class="card-header">
@@ -31,6 +31,7 @@
         border
         style="width: 100%"
         v-loading="loading"
+        class="center-table"
       >
         <!-- 序号列 -->
         <el-table-column
@@ -65,7 +66,7 @@
             </el-text>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="100" fixed="right">
+        <el-table-column label="操作" width="100">
           <template #default="scope">
             <el-button
               type="primary"
@@ -221,24 +222,33 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.guide-record-container {
+.subject-list-container {
   padding: 20px;
 }
 
 .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-weight: bold;
   color: #333;
-  font-size: 16px;
 }
 
-/* 表格内容截断样式 */
-:deep(.el-table__cell) {
-  padding: 12px 8px;
+/* 表格文字居中 */
+.center-table :deep(.el-table__cell) {
+  text-align: center;
+}
+
+/* 子文本样式（用于显示第二行信息） */
+.sub-text {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 2px;
 }
 
 /* 响应式布局 */
 @media (max-width: 768px) {
-  .guide-record-container {
+  .subject-list-container {
     padding: 10px;
   }
 

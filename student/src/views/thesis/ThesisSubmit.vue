@@ -4,7 +4,13 @@
       <template #header>
         <div class="card-header">
           <span>论文初稿</span>
-          <el-button type="primary" @click="handleAdd">新增</el-button>
+          <el-button 
+            type="primary" 
+            @click="handleAdd"
+            :disabled="hasPassedAudit"
+          >
+            新增
+          </el-button>
         </div>
       </template>
 
@@ -24,8 +30,23 @@
         </template>
       </el-alert>
 
+      <!-- 审核通过提示 -->
+      <el-alert
+        v-if="hasPassedAudit"
+        title="提交提示"
+        type="warning"
+        :closable="false"
+        show-icon
+        class="rate-alert"
+      >
+        <template #default>
+          您已有论文初稿审核通过，暂不允许新增
+        </template>
+      </el-alert>
+
       <!-- 课题列表 -->
       <el-table
+        v-if="subjectList.length > 0"
         :data="subjectList"
         border
         style="width: 100%"
@@ -33,9 +54,18 @@
         class="center-table"
       >
         <!-- 版本号 -->
-        <el-table-column prop="version" label="版本号" width="100">
+        <el-table-column prop="version" label="版本号" width="70">
           <template #default="scope">
             {{ scope.row.version ?? "" }}
+          </template>
+        </el-table-column>
+
+        <!-- 审核状态 -->
+        <el-table-column label="审核状态" width="90">
+          <template #default="scope">
+            <el-tag :type="getFileStatusType(scope.row.adutisStatus)">
+              {{ getFileStatusText(scope.row.adutisStatus) }}
+            </el-tag>
           </template>
         </el-table-column>
 
@@ -62,7 +92,14 @@
         </el-table-column>
 
         <!-- 提交时间 -->
-        <el-table-column prop="submitTime" label="提交时间" width="180" />
+        <el-table-column prop="submitTime" label="提交时间" width="160" />
+
+        <!-- 查重完成时间 -->
+        <el-table-column prop="duplicateCheckTime" label="查重时间" width="160">
+          <template #default="scope">
+            {{ scope.row.duplicateCheckTime ?? "-" }}
+          </template>
+        </el-table-column>
 
         <!-- 查重率 -->
         <el-table-column label="查重率" width="100">
@@ -70,6 +107,15 @@
             <span :class="getRateClass(scope.row.duplicateCheckRate)">
               {{ scope.row.duplicateCheckRate ?? "-" }}%
             </span>
+          </template>
+        </el-table-column>
+
+        <!-- 格式审核 -->
+        <el-table-column label="格式审核" width="90">
+          <template #default="scope">
+            <el-tag :type="getFormatCheckStatusType(scope.row.formatCheckStatus)">
+              {{ getFormatCheckStatusText(scope.row.formatCheckStatus) }}
+            </el-tag>
           </template>
         </el-table-column>
 
@@ -106,7 +152,7 @@
       <!-- 无数据提示 -->
       <el-empty
         v-if="subjectList.length === 0 && !loading"
-        description="暂无课题数据"
+        description="暂无论文初稿数据"
       />
 
       <!-- 分页 -->
@@ -160,6 +206,17 @@
           </el-upload>
         </el-form-item>
 
+        <el-form-item label="查重时间" prop="duplicateCheckTime">
+          <el-date-picker
+            v-model="addForm.duplicateCheckTime"
+            type="datetime"
+            placeholder="请选择查重完成时间"
+            :disabled="!addForm.file"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            clearable
+          />
+        </el-form-item>
+
         <el-form-item label="查重率" prop="duplicateCheckRate">
           <el-input
             v-model="addForm.duplicateCheckRate"
@@ -205,6 +262,9 @@
         <el-descriptions-item label="版本号">{{
           currentRow.version ?? "-"
         }}</el-descriptions-item>
+        <el-descriptions-item label="系部名称">{{
+          currentRow.deptName || "-"
+        }}</el-descriptions-item>
         <el-descriptions-item label="工号/导师名">
           {{ currentRow.teacherAccount || "-" }} /
           {{ currentRow.teacherName || "-" }}
@@ -216,11 +276,9 @@
         <el-descriptions-item label="提交时间">{{
           currentRow.submitTime || "-"
         }}</el-descriptions-item>
-        <el-descriptions-item label="文件状态">
-          <el-tag :type="getFileStatusType(currentRow.fileStatus)">
-            {{ getFileStatusText(currentRow.fileStatus) }}
-          </el-tag>
-        </el-descriptions-item>
+        <el-descriptions-item label="查重时间">{{
+          currentRow.duplicateCheckTime || "-"
+        }}</el-descriptions-item>
         <el-descriptions-item label="查重率">
           <span :class="getRateClass(currentRow.duplicateCheckRate)">
             {{ currentRow.duplicateCheckRate ?? "-" }}%
@@ -237,18 +295,30 @@
             size="small"
             style="margin-left: 8px"
           >
-            {{
-              currentRow.duplicateCheckRate <= maxAllowRate
-                ? "符合要求"
-                : "超出阈值"
-            }}
+            {{ currentRow.duplicateCheckRate <= maxAllowRate ? "符合要求" : "超出阈值" }}
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="最大允许查重率">
           {{ maxAllowRate ?? "-" }}%
         </el-descriptions-item>
+        <el-descriptions-item label="格式检查状态">
+          <el-tag :type="getFormatCheckStatusType(currentRow.formatCheckStatus)">
+            {{ getFormatCheckStatusText(currentRow.formatCheckStatus) }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="格式检查时间">{{
+          currentRow.formatCheckTime || "-"
+        }}</el-descriptions-item>
+        <el-descriptions-item label="审核状态">
+          <el-tag :type="getFileStatusType(currentRow.adutisStatus)">
+            {{ getFileStatusText(currentRow.adutisStatus) }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="审核时间">{{
+          currentRow.adutisTime || "-"
+        }}</el-descriptions-item>
         <el-descriptions-item label="审核意见">
-          {{ currentRow.auditRemark || "-" }}
+          {{ currentRow.adutisRemark || "-" }}
         </el-descriptions-item>
       </el-descriptions>
       <template #footer>
@@ -283,6 +353,7 @@ const total = ref(0);
 const currentPage = ref(1);
 const pageSize = ref(10);
 const loading = ref(false);
+const hasPassedAudit = ref(false);
 
 // 新增对话框
 const addDialogVisible = ref(false);
@@ -291,11 +362,13 @@ const uploadRef = ref(null);
 const submitLoading = ref(false);
 const addForm = reactive({
   file: null,
+  duplicateCheckTime: "",
   duplicateCheckRate: "",
 });
 
 const addFormRules = {
   file: [{ required: true, message: "请选择文件", trigger: "change" }],
+  duplicateCheckTime: [{ required: true, message: "请选择查重完成时间", trigger: "change" }],
   duplicateCheckRate: [
     { required: true, message: "请输入查重率", trigger: "blur" },
     {
@@ -340,17 +413,15 @@ const getSubjectList = async () => {
 
     if (response?.status === "success" && response.code === 200) {
       const records = response.data?.records || response.data?.list || [];
-      // 数据转换，适配页面显示字段
-      subjectList.value = records.map((item) => ({
-        ...item,
-        version: item.version ?? item.id ?? "",
-        fileStatus: item.adutisStatus || item.auditStatus,
-        auditRemark: item.adutisRemark || item.auditRemark,
-      }));
+      // 直接使用原始数据，不进行字段映射
+      subjectList.value = records;
       total.value = response.data?.total || 0;
+      // 检查是否有审核状态为通过的记录
+      hasPassedAudit.value = subjectList.value.some(item => item.adutisStatus === 1);
     } else {
       subjectList.value = [];
       total.value = 0;
+      hasPassedAudit.value = false;
       ElMessage.warning("暂无数据");
     }
   } catch (error) {
@@ -364,6 +435,7 @@ const getSubjectList = async () => {
 // 处理新增
 const handleAdd = () => {
   addForm.file = null;
+  addForm.duplicateCheckTime = "";
   addForm.duplicateCheckRate = "";
   if (uploadRef.value) {
     uploadRef.value.clearFiles();
@@ -404,7 +476,9 @@ const handleSubmit = async () => {
       // 1. 上传文件
       const uploadResponse = await fileApi.upload(
         addForm.file,
-        {},
+        {
+          fileType: 4, // 4-论文初稿
+        },
         {
           showLoading: true,
         },
@@ -423,9 +497,13 @@ const handleSubmit = async () => {
       }
 
       // 2. 提交论文初稿
+      // 版本号为当前数据总数加一
+      const version = total.value + 1;
       const submitResponse = await thesisDraftApi.studentApply(
         {
           fileId: fileId,
+          version: version,
+          duplicateCheckTime: addForm.duplicateCheckTime,
           duplicateCheckRate: parseFloat(addForm.duplicateCheckRate),
         },
         { showLoading: false },
@@ -434,6 +512,7 @@ const handleSubmit = async () => {
       if (submitResponse?.status === "success" && submitResponse.code === 200) {
         ElMessage.success("提交成功");
         addDialogVisible.value = false;
+        // 重新获取列表数据，更新 hasPassedAudit 状态
         getSubjectList();
       } else {
         ElMessage.error(submitResponse?.info || "提交失败");
@@ -501,13 +580,13 @@ const handleCurrentChange = (val) => {
 
 // 获取文件状态文本
 const getFileStatusText = (status) => {
-  const map = { 0: "未提交", 1: "已提交", 2: "已审核" };
+  const map = { 0: "待审核", 1: "通过", 2: "驳回" };
   return map[status] || "未知";
 };
 
 // 获取文件状态类型
 const getFileStatusType = (status) => {
-  const map = { 0: "info", 1: "warning", 2: "success" };
+  const map = { 0: "info", 1: "success", 2: "danger" };
   return map[status] || "info";
 };
 
@@ -516,6 +595,18 @@ const getRateClass = (rate) => {
   if (rate === null || rate === undefined) return "";
   if (maxAllowRate.value === null) return "";
   return rate <= maxAllowRate.value ? "rate-pass" : "rate-fail";
+};
+
+// 获取格式审核状态文本
+const getFormatCheckStatusText = (status) => {
+  const map = { 0: "待审核", 1: "通过", 2: "不通过" };
+  return map[status] || "未知";
+};
+
+// 获取格式审核状态类型
+const getFormatCheckStatusType = (status) => {
+  const map = { 0: "info", 1: "success", 2: "danger" };
+  return map[status] || "info";
 };
 
 onMounted(() => {

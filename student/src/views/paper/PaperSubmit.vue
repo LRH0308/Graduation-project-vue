@@ -1,184 +1,143 @@
 <template>
   <div class="paper-submit-container">
-    <el-card>
+    <el-card class="paper-card">
       <template #header>
         <div class="card-header">
-          <span>论文终稿</span>
+          <el-icon class="header-icon"><Document /></el-icon>
+          <span class="header-title">论文终稿</span>
         </div>
       </template>
 
-      <!-- 查重率提示 -->
-      <el-alert
-        v-if="maxAllowRate !== null"
-        title="查重率要求"
-        type="info"
-        :closable="false"
-        show-icon
-        class="rate-alert"
-      >
-        <template #default>
-          当前导师要求的最大查重率为：
-          <span class="rate-value">{{ maxAllowRate }}%</span>
-          ，请确保论文查重率不超过该阈值
-        </template>
-      </el-alert>
-
-      <div v-loading="loading">
+      <div v-loading="loading" class="content-container">
         <!-- 已提交状态 -->
-        <div v-if="paperInfo.id" class="submitted-info">
-          <el-alert
-            :title="paperInfo.finalStatus === 2 ? '论文已归档' : '已提交论文'"
-            :type="paperInfo.finalStatus === 2 ? 'warning' : 'success'"
-            :closable="false"
-            show-icon
-          >
-            <p><strong>论文标题：</strong>{{ paperInfo.finalTitle || "-" }}</p>
-            <p><strong>提交时间：</strong>{{ paperInfo.submitTime || "-" }}</p>
-            <p>
-              <strong>状态：</strong>{{ getStatusText(paperInfo.finalStatus) }}
-            </p>
-            <p v-if="paperInfo.duplicateCheckRate">
-              <strong>查重率：</strong>
-              <span :class="getRateClass(paperInfo.duplicateCheckRate)">
-                {{ paperInfo.duplicateCheckRate }}%
-              </span>
-            </p>
-            <p><strong>关键词：</strong>{{ paperInfo.finalKeywords || "-" }}</p>
-            <p><strong>摘要：</strong>{{ paperInfo.finalAbstract || "-" }}</p>
-          </el-alert>
-
-          <div class="action-buttons" style="margin-top: 20px">
-            <el-button
-              v-if="paperInfo.viewUrl"
-              type="primary"
-              @click="handleViewPaper"
-            >
-              在线查看
-            </el-button>
-            <el-button type="success" @click="handleDownload">
-              下载文件
-            </el-button>
-          </div>
+        <div v-if="paperInfo.id" class="submitted-status">
+          <el-card class="status-card" :body-style="{ padding: '20px' }">
+            <div class="status-header">
+              <el-tag :type="paperInfo.finalStatus === 2 ? 'warning' : 'success'" size="large" effect="dark">
+                {{ paperInfo.finalStatus === 2 ? '论文已归档' : '已提交论文' }}
+              </el-tag>
+            </div>
+            
+            <div class="status-content">
+              <el-descriptions :column="1" border>
+                <el-descriptions-item label="提交时间">{{ paperInfo.submitTime || "-" }}</el-descriptions-item>
+                <el-descriptions-item label="状态">{{ getStatusText(paperInfo.finalStatus) }}</el-descriptions-item>
+                <el-descriptions-item label="论文标题">{{ paperInfo.finalTitle || "-" }}</el-descriptions-item>
+                
+                <el-descriptions-item label="关键词">{{ paperInfo.finalKeywords || "-" }}</el-descriptions-item>
+                <el-descriptions-item label="摘要">{{ paperInfo.finalAbstract || "-" }}</el-descriptions-item>
+              </el-descriptions>
+            </div>
+            
+            <div class="action-buttons" style="margin-top: 20px">
+              <el-button type="success" @click="handleDownload" size="large">
+                <el-icon><Download /></el-icon>
+                下载文件
+              </el-button>
+            </div>
+          </el-card>
         </div>
 
         <!-- 提交表单 -->
-        <el-form
-          v-else
-          ref="paperFormRef"
-          :model="paperForm"
-          :rules="formRules"
-          label-width="120px"
-          class="paper-form"
-        >
-          <el-form-item label="论文标题" prop="finalTitle">
-            <el-input
-              v-model="paperForm.finalTitle"
-              placeholder="请输入论文标题"
-              maxlength="200"
-              show-word-limit
-            />
-          </el-form-item>
-
-          <el-form-item label="关键词" prop="finalKeywords">
-            <el-input
-              v-model="paperForm.finalKeywords"
-              placeholder="请输入关键词，用分号分隔"
-              maxlength="100"
-              show-word-limit
+        <div v-else class="submit-form">
+          <el-card class="form-card" :body-style="{ padding: '25px' }">
+            <el-form
+              ref="paperFormRef"
+              :model="paperForm"
+              :rules="formRules"
+              label-width="120px"
             >
-              <template #append>
-                <el-tooltip content="多个关键词请用分号分隔">
-                  <el-icon><QuestionFilled /></el-icon>
-                </el-tooltip>
-              </template>
-            </el-input>
-          </el-form-item>
+              <el-form-item label="论文标题" prop="finalTitle">
+                <el-input
+                  v-model="paperForm.finalTitle"
+                  placeholder="请输入论文标题"
+                  maxlength="200"
+                  show-word-limit
+                  size="large"
+                />
+              </el-form-item>
 
-          <el-form-item label="摘要" prop="finalAbstract">
-            <el-input
-              v-model="paperForm.finalAbstract"
-              type="textarea"
-              :rows="6"
-              placeholder="请输入论文摘要（300-500 字）"
-              maxlength="2000"
-              show-word-limit
-            />
-          </el-form-item>
+              <el-form-item label="关键词" prop="finalKeywords">
+                <el-input
+                  v-model="paperForm.finalKeywords"
+                  placeholder="请输入关键词，用分号分隔"
+                  maxlength="100"
+                  show-word-limit
+                  size="large"
+                >
+                  <template #append>
+                    <el-tooltip content="多个关键词请用分号分隔">
+                      <el-icon><QuestionFilled /></el-icon>
+                    </el-tooltip>
+                  </template>
+                </el-input>
+              </el-form-item>
 
-          <el-form-item label="查重率" prop="duplicateCheckRate">
-            <el-input
-              v-model="paperForm.duplicateCheckRate"
-              type="number"
-              placeholder="请输入查重率（如 12.50）"
-              :disabled="!uploadFile"
-              clearable
-            >
-              <template #append>%</template>
-            </el-input>
-            <el-alert
-              v-if="maxAllowRate !== null && paperForm.duplicateCheckRate"
-              :type="
-                parseFloat(paperForm.duplicateCheckRate) <= maxAllowRate
-                  ? 'success'
-                  : 'error'
-              "
-              :closable="false"
-              show-icon
-              style="margin-top: 10px"
-            >
-              {{
-                parseFloat(paperForm.duplicateCheckRate) <= maxAllowRate
-                  ? `查重率符合要求（≤${maxAllowRate}%）`
-                  : `查重率超过阈值（>${maxAllowRate}%），无法提交`
-              }}
-            </el-alert>
-          </el-form-item>
+              <el-form-item label="摘要" prop="finalAbstract">
+                <el-input
+                  v-model="paperForm.finalAbstract"
+                  type="textarea"
+                  :rows="6"
+                  placeholder="请输入论文摘要（300-500 字）"
+                  maxlength="2000"
+                  show-word-limit
+                  size="large"
+                />
+              </el-form-item>
 
-          <el-form-item label="上传文件" prop="file">
-            <el-upload
-              ref="uploadRef"
-              class="upload-demo"
-              drag
-              :auto-upload="false"
-              :on-change="handleFileChange"
-              :limit="1"
-              :on-exceed="handleExceed"
-              accept=".doc,.docx,.pdf"
-            >
-              <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-              <div class="el-upload__text">
-                将文件拖到此处，或<em>点击上传</em>
-              </div>
-              <template #tip>
-                <div class="el-upload__tip">
-                  支持格式：doc, docx, pdf，最大 50MB
+              <el-form-item label="上传文件" prop="file">
+                <el-upload
+                  ref="uploadRef"
+                  class="upload-demo"
+                  drag
+                  :auto-upload="false"
+                  :on-change="handleFileChange"
+                  :limit="1"
+                  :on-exceed="handleExceed"
+                  accept=".doc,.docx,.pdf"
+                >
+                  <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
+                  <div class="el-upload__text">
+                    将文件拖到此处，或<em>点击上传</em>
+                  </div>
+                  <template #tip>
+                    <div class="el-upload__tip">
+                      支持格式：doc, docx, pdf，最大 50MB
+                    </div>
+                  </template>
+                </el-upload>
+              </el-form-item>
+
+              <el-form-item>
+                <div class="form-actions">
+                  <el-button
+                    type="primary"
+                    @click="handleSubmit"
+                    :loading="submitting"
+                    size="large"
+                  >
+                    <el-icon><Check /></el-icon>
+                    提交
+                  </el-button>
+                  <el-button @click="handleReset" size="large">
+                    <el-icon><Refresh /></el-icon>
+                    重置
+                  </el-button>
                 </div>
-              </template>
-            </el-upload>
-          </el-form-item>
-
-          <el-form-item>
-            <el-button
-              type="primary"
-              @click="handleSubmit"
-              :loading="submitting"
-              :disabled="isOverRate"
-            >
-              提交
-            </el-button>
-            <el-button @click="handleReset">重置</el-button>
-          </el-form-item>
-        </el-form>
+              </el-form-item>
+            </el-form>
+          </el-card>
+        </div>
       </div>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { UploadFilled, QuestionFilled } from "@element-plus/icons-vue";
-import { thesisFinalApi, fileApi, thesisDraftApi } from "@/utils/apiRequest";
+import { UploadFilled, QuestionFilled, Document, Download, Check, Refresh } from "@element-plus/icons-vue";
+import { thesisFinalApi, fileApi } from "@/utils/apiRequest";
 import { useUserStore } from "@/stores/user";
 
 const userStore = useUserStore();
@@ -188,15 +147,13 @@ const uploadRef = ref(null);
 const paperInfo = ref({});
 const loading = ref(false);
 const submitting = ref(false);
-const maxAllowRate = ref(null);
 const uploadFile = ref(null);
 
 const paperForm = reactive({
   finalTitle: "",
   finalKeywords: "",
   finalAbstract: "",
-  duplicateCheckRate: "",
-  fileType: 1,
+  fileType: 5,
   viewUrl: "",
 });
 
@@ -210,34 +167,6 @@ const formRules = {
     { required: true, message: "请输入摘要", trigger: "blur" },
     { min: 50, message: "摘要至少 50 个字符", trigger: "blur" },
   ],
-  duplicateCheckRate: [
-    { required: true, message: "请输入查重率", trigger: "blur" },
-    {
-      pattern: /^\d+(\.\d{1,2})?$/,
-      message: "查重率格式不正确（如 12.50）",
-      trigger: "blur",
-    },
-  ],
-};
-
-// 判断是否超过查重率阈值
-const isOverRate = computed(() => {
-  if (!maxAllowRate.value || !paperForm.duplicateCheckRate) return false;
-  return parseFloat(paperForm.duplicateCheckRate) > maxAllowRate.value;
-});
-
-// 获取最大查重率阈值
-const getMaxAllowRate = async () => {
-  try {
-    const response = await thesisDraftApi.getDuplicateCheckThreshold({
-      showLoading: false,
-    });
-    if (response?.status === "success" && response.code === 200) {
-      maxAllowRate.value = response.data?.maxAllowRate ?? null;
-    }
-  } catch (error) {
-    console.error("获取查重率阈值失败:", error);
-  }
 };
 
 // 获取论文终稿信息
@@ -294,14 +223,6 @@ const handleSubmit = async () => {
       return;
     }
 
-    // 检查查重率是否超过阈值
-    if (isOverRate.value) {
-      ElMessage.error(
-        `查重率 ${paperForm.duplicateCheckRate}% 超过规定的阈值 ${maxAllowRate.value}%，无法提交！`,
-      );
-      return;
-    }
-
     try {
       // 确认提交
       await ElMessageBox.confirm(
@@ -341,7 +262,6 @@ const handleSubmit = async () => {
         finalTitle: paperForm.finalTitle,
         finalKeywords: paperForm.finalKeywords,
         finalAbstract: paperForm.finalAbstract,
-        duplicateCheckRate: parseFloat(paperForm.duplicateCheckRate),
       };
 
       const res = await thesisFinalApi.studentApply(submitData);
@@ -369,22 +289,12 @@ const handleReset = () => {
   paperForm.finalTitle = "";
   paperForm.finalKeywords = "";
   paperForm.finalAbstract = "";
-  paperForm.duplicateCheckRate = "";
   uploadFile.value = null;
   if (uploadRef.value) {
     uploadRef.value.clearFiles();
   }
   if (paperFormRef.value) {
     paperFormRef.value.clearValidate();
-  }
-};
-
-// 在线查看论文
-const handleViewPaper = () => {
-  if (paperInfo.value.viewUrl) {
-    window.open(paperInfo.value.viewUrl, "_blank");
-  } else {
-    ElMessage.warning("暂无在线查看地址");
   }
 };
 
@@ -422,15 +332,7 @@ const getStatusText = (status) => {
   return map[status] || "未知";
 };
 
-// 获取查重率样式类
-const getRateClass = (rate) => {
-  if (rate === null || rate === undefined) return "";
-  if (maxAllowRate.value === null) return "";
-  return rate <= maxAllowRate.value ? "rate-pass" : "rate-fail";
-};
-
 onMounted(() => {
-  getMaxAllowRate();
   getPaperInfo();
 });
 </script>
@@ -438,60 +340,112 @@ onMounted(() => {
 <style scoped>
 .paper-submit-container {
   padding: 20px;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+}
+
+.paper-card {
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 .card-header {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
   font-weight: bold;
   color: #333;
 }
 
-/* 查重率提示框 */
-.rate-alert {
+.header-icon {
+  margin-right: 10px;
+  font-size: 20px;
+  color: #409eff;
+}
+
+.content-container {
+  padding: 20px 0;
+}
+
+/* 已提交状态样式 */
+.submitted-status {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.status-card {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.status-header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.status-content {
   margin-bottom: 20px;
 }
 
-.rate-value {
-  font-weight: bold;
-  color: #f56c6c;
-  font-size: 16px;
+/* 提交表单样式 */
+.submit-form {
+  animation: fadeIn 0.5s ease-in-out;
 }
 
-.submitted-info {
-  margin-bottom: 20px;
-}
-
-.submitted-info p {
-  margin: 8px 0;
-  line-height: 1.6;
-}
-
-.paper-form {
-  margin-top: 20px;
+.form-card {
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .upload-demo {
   width: 100%;
+  margin-top: 10px;
 }
 
-/* 查重率样式 */
-.rate-pass {
-  color: #67c23a;
-  font-weight: bold;
-}
-
-.rate-fail {
-  color: #f56c6c;
-  font-weight: bold;
-}
-
-.tips {
-  font-size: 12px;
-  color: #999;
-  margin-top: 5px;
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
 }
 
 .action-buttons {
   display: flex;
-  gap: 10px;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .paper-submit-container {
+    padding: 10px;
+  }
+  
+  .paper-card {
+    max-width: 100%;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 </style>

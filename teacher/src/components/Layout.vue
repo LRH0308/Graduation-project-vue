@@ -72,9 +72,14 @@
             <span>中期检查审核</span>
           </el-menu-item>
 
-          <el-menu-item index="/paper/audit">
+          <el-menu-item index="/thesis/draft/audit">
             <el-icon><Files /></el-icon>
-            <span>论文审核</span>
+            <span>论文初稿</span>
+          </el-menu-item>
+
+          <el-menu-item index="/thesis/final/audit">
+            <el-icon><Files /></el-icon>
+            <span>论文终稿</span>
           </el-menu-item>
 
           <el-menu-item index="/defense/arrangement">
@@ -123,6 +128,7 @@ const userStore = useUserStore();
 const activeMenu = computed(() => {
   const path = route.path;
   if (path.startsWith("/defense")) return "defense";
+  if (path.startsWith("/thesis")) return "thesis";
   return path;
 });
 

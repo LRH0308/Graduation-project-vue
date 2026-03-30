@@ -57,11 +57,17 @@ const router = createRouter({
           name: "MidAudit",
           component: () => import("@/views/midCheck/MidAudit.vue"),
         },
-        // 论文提交
+        // 论文初稿审核
         {
-          path: "/paper/audit",
-          name: "PaperAudit",
-          component: () => import("@/views/paper/PaperAudit.vue"),
+          path: "/thesis/draft/audit",
+          name: "ThesisDraftAudit",
+          component: () => import("@/views/thesis/ThesisDraftAudit.vue"),
+        },
+        // 论文终稿审核
+        {
+          path: "/thesis/final/audit",
+          name: "ThesisFinalAudit",
+          component: () => import("@/views/thesis/ThesisFinalAudit.vue"),
         },
         // 答辩安排
         {
