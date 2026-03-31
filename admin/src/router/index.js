@@ -41,9 +41,14 @@ const router = createRouter({
             import("@/views/midtermcheck/MidtermCheckManage.vue"),
         },
         {
-          path: "thesis/manage",
-          name: "ThesisManage",
-          component: () => import("@/views/thesis/ThesisManage.vue"),
+          path: "thesis/draft",
+          name: "ThesisDraftManage",
+          component: () => import("@/views/thesis/ThesisDraftManage.vue"),
+        },
+        {
+          path: "thesis/final",
+          name: "ThesisFinalManage",
+          component: () => import("@/views/thesis/ThesisFinalManage.vue"),
         },
         {
           path: "defense/manage",
@@ -54,6 +59,26 @@ const router = createRouter({
           path: "guidance/manage",
           name: "GuidanceManage",
           component: () => import("@/views/guidance/GuidanceManage.vue"),
+        },
+        {
+          path: "student/manage",
+          name: "StudentManage",
+          component: () => import("@/views/student/StudentManage.vue"),
+        },
+        {
+          path: "teacher/manage",
+          name: "TeacherManage",
+          component: () => import("@/views/teacher/TeacherManage.vue"),
+        },
+        {
+          path: "file/manage",
+          name: "FileManage",
+          component: () => import("@/views/file/FileManage.vue"),
+        },
+        {
+          path: "plagiarism/setting",
+          name: "PlagiarismSetting",
+          component: () => import("@/views/plagiarism/PlagiarismSetting.vue"),
         },
       ],
     },

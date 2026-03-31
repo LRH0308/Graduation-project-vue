@@ -1,6 +1,6 @@
 <template>
   <el-container class="layout-container">
-    <!-- 顶部蓝色信息栏 -->
+    <!-- 顶部蓝色信息栏（固定） -->
     <el-header class="layout-header">
       <h1 class="system-title">毕业设计管理系统 - 管理员端</h1>
       <div class="header-right">
@@ -19,17 +19,17 @@
         </el-button>
       </div>
     </el-header>
-    
-    <el-container>
-      <!-- 左侧导航栏 -->
-      <el-aside width="220px" class="layout-aside">
+
+    <el-container class="main-container">
+      <!-- 左侧灰色导航菜单（固定） -->
+      <el-aside width="200px" class="layout-aside">
         <el-menu
           :default-active="activeMenu"
           class="aside-menu"
-          router
           background-color="#304156"
           text-color="#bfcbd9"
           active-text-color="#409EFF"
+          router
         >
           <el-menu-item index="/home">
             <el-icon><House /></el-icon>
@@ -56,9 +56,14 @@
             <span>中期检查管理</span>
           </el-menu-item>
           
-          <el-menu-item index="/thesis/manage">
+          <el-menu-item index="/thesis/draft">
             <el-icon><Files /></el-icon>
-            <span>论文提交管理</span>
+            <span>论文初稿管理</span>
+          </el-menu-item>
+          
+          <el-menu-item index="/thesis/final">
+            <el-icon><Files /></el-icon>
+            <span>论文终稿管理</span>
           </el-menu-item>
           
           <el-menu-item index="/defense/manage">
@@ -70,10 +75,30 @@
             <el-icon><Comment /></el-icon>
             <span>过程指导管理</span>
           </el-menu-item>
+          
+          <el-menu-item index="/student/manage">
+            <el-icon><User /></el-icon>
+            <span>学生管理</span>
+          </el-menu-item>
+          
+          <el-menu-item index="/teacher/manage">
+            <el-icon><UserFilled /></el-icon>
+            <span>导师管理</span>
+          </el-menu-item>
+          
+          <el-menu-item index="/file/manage">
+            <el-icon><Files /></el-icon>
+            <span>文件管理</span>
+          </el-menu-item>
+          
+          <el-menu-item index="/plagiarism/setting">
+            <el-icon><CircleCheck /></el-icon>
+            <span>论文查重设置</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
-      
-      <!-- 主要内容区域 -->
+
+      <!-- 右侧白色内容区域（可滚动） -->
       <el-main class="layout-main">
         <router-view />
       </el-main>
@@ -82,47 +107,61 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { ElMessageBox, ElMessage } from 'element-plus'
-import { useUserStore } from '@/stores/user'
-import { 
-  House, Document, Reading, Edit, Collection, Files, Timer, Comment, User, ArrowDown, Refresh, SwitchButton
-} from '@element-plus/icons-vue'
+import { ref, computed, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { ElMessageBox, ElMessage } from "element-plus";
+import { useUserStore } from "@/stores/user";
+import {
+  House,
+  Document,
+  Reading,
+  Edit,
+  Collection,
+  Files,
+  Timer,
+  Comment,
+  SwitchButton,
+  User,
+  UserFilled,
+  CircleCheck,
+} from "@element-plus/icons-vue";
 
-const router = useRouter()
-const route = useRoute()
-const userStore = useUserStore()
+const router = useRouter();
+const route = useRoute();
+const userStore = useUserStore();
 
 // 获取当前激活的菜单项
 const activeMenu = computed(() => {
-  return route.path
-})
+  return route.path;
+});
 
-
-
-// 退出登录
+// 处理退出登录
 const handleLogout = () => {
-  ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    localStorage.removeItem('token')
-    ElMessage.success('已退出登录')
-    router.push('/login')
-  }).catch(() => {})
-}
+  ElMessageBox.confirm("确定要退出登录吗？", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(() => {
+      localStorage.removeItem('token');
+      ElMessage.success("已退出登录");
+      router.push("/login");
+    })
+    .catch(() => {
+      // 用户取消操作
+    });
+};
 
-onMounted(() => {
-  // 检查登录状态
-  if (!localStorage.getItem('token') && route.path !== '/login') {
-    router.push('/login')
+// 组件挂载时检查登录状态
+onMounted(async () => {
+  if (!localStorage.getItem('token') && route.path !== "/login") {
+    router.push("/login");
   }
-})
+});
 </script>
 
 <style scoped>
+/* 整体容器 - 占满整个视口 */
 .layout-container {
   width: 100%;
   height: 100vh;
@@ -131,6 +170,7 @@ onMounted(() => {
   overflow: hidden;
 }
 
+/* 顶部蓝色信息栏 - 固定高度，不滚动 */
 .layout-header {
   height: 60px;
   min-height: 60px;
@@ -145,9 +185,9 @@ onMounted(() => {
 }
 
 .system-title {
+  margin: 0;
   font-size: 20px;
   font-weight: bold;
-  margin: 0;
 }
 
 .header-right {
@@ -188,7 +228,7 @@ onMounted(() => {
 }
 
 /* 主体容器 - 占据顶部下方的剩余空间 */
-.el-container:nth-child(2) {
+.main-container {
   flex: 1;
   display: flex;
   overflow: hidden; /* 防止溢出 */

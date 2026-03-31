@@ -1,9 +1,9 @@
 <template>
-  <div class="midterm-check-manage-container">
+  <div class="thesis-final-manage-container">
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>中期检查管理</span>
+          <span>论文终稿管理</span>
         </div>
       </template>
       
@@ -30,6 +30,7 @@
               <el-select v-model="searchForm.auditStatus" placeholder="请选择" clearable>
                 <el-option :value="0" label="待审核" />
                 <el-option :value="1" label="已通过" />
+                <el-option :value="2" label="不通过" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -44,7 +45,7 @@
       
       <!-- 数据表格 -->
       <el-table 
-        :data="midtermCheckList" 
+        :data="thesisFinalList" 
         border 
         style="width: 100%; margin-top: 20px;"
         v-loading="loading"
@@ -53,25 +54,24 @@
         <el-table-column prop="id" label="ID" width="60" align="center" />
         <el-table-column prop="projectName" label="项目名称" min-width="200" align="center" />
         <el-table-column prop="deptName" label="所属系部" width="120" align="center" />
+        <el-table-column label="工号/导师名" width="150" align="center">
+          <template #default="{ row }">
+            {{ row.teacherAccount }}/{{ row.teacherName }}
+          </template>
+        </el-table-column>
         <el-table-column label="学号/学生名" width="150" align="center">
           <template #default="{ row }">
             {{ row.studentAccount ? `${row.studentAccount}/${row.studentName}` : '未分配' }}
           </template>
         </el-table-column>
         <el-table-column prop="submitTime" label="提交时间" width="160" align="center" />
-        <el-table-column label="工号/导师名" width="150" align="center">
-          <template #default="{ row }">
-            {{ row.teacherAccount }}/{{ row.teacherName }}
-          </template>
-        </el-table-column>
         <el-table-column label="审核状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="getAuditStatusType(row.auditStatus)">
-              {{ getAuditStatusText(row.auditStatus) }}
+            <el-tag :type="getAuditStatusType(row.finalStatus)">
+              {{ getAuditStatusText(row.finalStatus) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="auditTime" label="审核时间" width="160" align="center" />
         <el-table-column fixed="right" label="操作" width="120" align="center">
           <template #default="{ row }">
             <el-button size="small" type="primary" link @click="handleView(row)">查看</el-button>
@@ -93,34 +93,37 @@
     </el-card>
     
     <!-- 详情对话框 -->
-    <el-dialog v-model="detailDialogVisible" title="中期检查详情" width="800px">
-      <!-- 中期检查信息 -->
-      <el-descriptions title="中期检查信息" :column="2" border>
-        <el-descriptions-item label="检查ID">{{ currentMidtermCheck.id }}</el-descriptions-item>
-        <el-descriptions-item label="项目名称">{{ currentMidtermCheck.projectName || '无' }}</el-descriptions-item>
-        <el-descriptions-item label="系部编号">{{ currentMidtermCheck.deptCode }}</el-descriptions-item>
-        <el-descriptions-item label="所属系部">{{ currentMidtermCheck.deptName || '无' }}</el-descriptions-item>
-        <el-descriptions-item label="文件ID">{{ currentMidtermCheck.fileId || '无' }}</el-descriptions-item>
-        <el-descriptions-item label="提交时间">{{ currentMidtermCheck.submitTime }}</el-descriptions-item>
-        <el-descriptions-item label="审核状态">{{ getAuditStatusText(currentMidtermCheck.auditStatus) }}</el-descriptions-item>
-        <el-descriptions-item label="审核时间">{{ currentMidtermCheck.auditTime || '未审核' }}</el-descriptions-item>
+    <el-dialog v-model="detailDialogVisible" title="论文终稿详情" width="800px">
+      <!-- 论文终稿信息 -->
+      <el-descriptions title="论文终稿信息" :column="2" border>
+        <el-descriptions-item label="终稿ID">{{ currentThesisFinal.id }}</el-descriptions-item>
+        <el-descriptions-item label="所属系部">{{ currentThesisFinal.deptName || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="项目ID">{{ currentThesisFinal.projectId }}</el-descriptions-item>
+        <el-descriptions-item label="项目名称">{{ currentThesisFinal.projectName || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="文件ID">{{ currentThesisFinal.finalFileId || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="文件类型">{{ getFileTypeText(currentThesisFinal.fileType) }}</el-descriptions-item>
+        <el-descriptions-item label="提交时间">{{ currentThesisFinal.submitTime }}</el-descriptions-item>
+        <el-descriptions-item label="审核状态">{{ getAuditStatusText(currentThesisFinal.finalStatus) }}</el-descriptions-item>
       </el-descriptions>
       <el-descriptions :column="1" border style="margin-top: 20px;">
-        <el-descriptions-item label="审核备注">{{ currentMidtermCheck.auditRemark || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="查看链接">{{ currentThesisFinal.viewUrl || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="论文标题">{{ currentThesisFinal.finalTitle || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="关键词">{{ currentThesisFinal.finalKeywords || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="摘要">{{ currentThesisFinal.finalAbstract || '无' }}</el-descriptions-item>
       </el-descriptions>
       
       <!-- 导师信息 -->
       <el-descriptions title="导师信息" :column="2" border style="margin-top: 20px;">
-        <el-descriptions-item label="指导教师">{{ currentMidtermCheck.teacherName }}</el-descriptions-item>
-        <el-descriptions-item label="教师账号">{{ currentMidtermCheck.teacherAccount }}</el-descriptions-item>
-        <el-descriptions-item label="导师ID">{{ currentMidtermCheck.teacherId }}</el-descriptions-item>
+        <el-descriptions-item label="指导教师">{{ currentThesisFinal.teacherName }}</el-descriptions-item>
+        <el-descriptions-item label="教师账号">{{ currentThesisFinal.teacherAccount }}</el-descriptions-item>
+        <el-descriptions-item label="导师ID">{{ currentThesisFinal.teacherId }}</el-descriptions-item>
       </el-descriptions>
       
       <!-- 学生信息 -->
       <el-descriptions title="学生信息" :column="2" border style="margin-top: 20px;">
-        <el-descriptions-item label="学生">{{ currentMidtermCheck.studentName }}</el-descriptions-item>
-        <el-descriptions-item label="学生账号">{{ currentMidtermCheck.studentAccount }}</el-descriptions-item>
-        <el-descriptions-item label="学生ID">{{ currentMidtermCheck.studentId }}</el-descriptions-item>
+        <el-descriptions-item label="学生">{{ currentThesisFinal.studentName }}</el-descriptions-item>
+        <el-descriptions-item label="学生学号">{{ currentThesisFinal.studentAccount }}</el-descriptions-item>
+        <el-descriptions-item label="学生ID">{{ currentThesisFinal.studentId }}</el-descriptions-item>
       </el-descriptions>
       
       <template #footer>
@@ -144,7 +147,7 @@ const searchForm = reactive({
 })
 
 // 数据列表
-const midtermCheckList = ref([])
+const thesisFinalList = ref([])
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -152,10 +155,10 @@ const loading = ref(false)
 
 // 详情对话框
 const detailDialogVisible = ref(false)
-const currentMidtermCheck = ref({})
+const currentThesisFinal = ref({})
 
-// 获取中期检查列表
-const getMidtermCheckList = async () => {
+// 获取论文终稿列表
+const getThesisFinalList = async () => {
   loading.value = true
   try {
     const params = {
@@ -170,14 +173,14 @@ const getMidtermCheckList = async () => {
       }
     })
     
-    const response = await post('/midtermCheck/getMidtermCheck', params)
+    const response = await post('/ThesisFinal/getThesisFinalList', params)
     if (response?.status === 'success') {
-      midtermCheckList.value = response.data?.records || []
+      thesisFinalList.value = response.data?.records || []
       total.value = response.data?.total || 0
     }
   } catch (error) {
-    console.error('获取中期检查列表失败:', error)
-    ElMessage.error('获取中期检查列表失败')
+    console.error('获取论文终稿列表失败:', error)
+    ElMessage.error('获取论文终稿列表失败')
   } finally {
     loading.value = false
   }
@@ -186,7 +189,7 @@ const getMidtermCheckList = async () => {
 // 处理搜索
 const handleSearch = () => {
   currentPage.value = 1
-  getMidtermCheckList()
+  getThesisFinalList()
 }
 
 // 重置搜索
@@ -195,44 +198,60 @@ const handleReset = () => {
     searchForm[key] = ''
   })
   currentPage.value = 1
-  getMidtermCheckList()
+  getThesisFinalList()
 }
 
 // 分页处理
 const handleSizeChange = (val) => {
   pageSize.value = val
-  getMidtermCheckList()
+  getThesisFinalList()
 }
 
 const handleCurrentChange = (val) => {
   currentPage.value = val
-  getMidtermCheckList()
+  getThesisFinalList()
 }
 
 // 查看详情
 const handleView = (row) => {
-  currentMidtermCheck.value = { ...row }
+  currentThesisFinal.value = { ...row }
   detailDialogVisible.value = true
 }
 
 // 状态文本映射
 const getAuditStatusText = (status) => {
-  const map = { 0: '待审核', 1: '已通过' }
+  const map = { 0: '待审核', 1: '已通过', 2: '不通过' }
   return map[status] || '未知'
 }
 
 const getAuditStatusType = (status) => {
-  const map = { 0: 'warning', 1: 'success' }
+  const map = { 0: 'warning', 1: 'success', 2: 'danger' }
   return map[status] || 'info'
 }
 
+const getFormatCheckStatusText = (status) => {
+  const map = { 0: '待检查', 1: '通过', 2: '不通过' }
+  return map[status] || '未知'
+}
+
+const getFormatCheckStatusType = (status) => {
+  const map = { 0: 'warning', 1: 'success', 2: 'danger' }
+  return map[status] || 'info'
+}
+
+// 文件类型文本映射
+const getFileTypeText = (type) => {
+  const map = { 1: '任务书', 2: '开题报告', 3: '中期成果', 4: '论文初稿', 5: '论文终稿', 6: '答辩材料' }
+  return map[type] || '无'
+}
+
 onMounted(() => {
-  getMidtermCheckList()
+  getThesisFinalList()
 })
 </script>
 
 <style scoped>
-.midterm-check-manage-container {
+.thesis-final-manage-container {
   padding: 20px;
 }
 

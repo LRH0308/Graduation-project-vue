@@ -8,44 +8,73 @@
       </template>
       
       <!-- 搜索表单 -->
-      <el-form :model="searchForm" :inline="true" class="search-form">
-        <el-form-item label="系编号">
-          <el-input v-model="searchForm.deptCode" placeholder="请输入系编号" clearable />
-        </el-form-item>
-        <el-form-item label="学生 ID">
-          <el-input v-model="searchForm.studentId" placeholder="请输入学生 ID" clearable />
-        </el-form-item>
-        <el-form-item label="答辩状态">
-          <el-select v-model="searchForm.defenseStatus" placeholder="请选择" clearable>
-            <el-option label="未答辩" :value="0" />
-            <el-option label="已答辩" :value="1" />
-            <el-option label="缓答辩" :value="2" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="handleReset">重置</el-button>
-        </el-form-item>
+      <el-form :model="searchForm" label-width="80px" size="small" class="search-form">
+        <el-row :gutter="20">
+          <el-col :span="6">
+            <el-form-item label="系编号">
+              <el-input v-model="searchForm.deptCode" placeholder="请输入系编号" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="学生">
+              <el-input v-model="searchForm.studentId" placeholder="请输入学生ID" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="答辩状态">
+              <el-select v-model="searchForm.defenseStatus" placeholder="请选择" clearable>
+                <el-option :value="0" label="未答辩" />
+                <el-option :value="1" label="已答辩" />
+                <el-option :value="2" label="缓答辩" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="系部">
+              <el-input v-model="searchForm.deptName" placeholder="请输入系部名称" clearable />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12" style="text-align: right;">
+            <el-button type="primary" @click="handleSearch">查询</el-button>
+            <el-button @click="handleReset">重置</el-button>
+          </el-col>
+        </el-row>
       </el-form>
       
       <!-- 数据表格 -->
-      <el-table :data="defenseList" v-loading="loading" border stripe>
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="projectId" label="项目 ID" width="100" />
-        <el-table-column prop="studentName" label="学生姓名" width="120" />
-        <el-table-column prop="studentAccount" label="学号" width="130" />
-        <el-table-column prop="deptName" label="系部" width="120" />
-        <el-table-column prop="defensePlace" label="答辩地点" width="150" />
-        <el-table-column prop="defenseTime" label="答辩时间" width="180" />
-        <el-table-column prop="teacherName" label="指导教师" width="120" />
-        <el-table-column prop="defenseStatus" label="答辩状态" width="100">
+      <el-table 
+        :data="defenseList" 
+        border 
+        style="width: 100%; margin-top: 20px;"
+        v-loading="loading"
+        align="center"
+      >
+        <el-table-column prop="id" label="ID" width="60" align="center" />
+        <el-table-column prop="deptName" label="所属系部" width="120" align="center" />
+        <el-table-column prop="projectId" label="项目ID" width="80" align="center" />
+        <el-table-column label="工号/导师名" width="150" align="center">
+          <template #default="{ row }">
+            {{ row.teacherAccount }}/{{ row.teacherName }}
+          </template>
+        </el-table-column>
+        <el-table-column label="学号/学生名" width="150" align="center">
+          <template #default="{ row }">
+            {{ row.studentAccount ? `${row.studentAccount}/${row.studentName}` : '未分配' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="defensePlace" label="答辩地点" width="120" align="center" />
+        <el-table-column prop="defenseTime" label="答辩时间" width="160" align="center" />
+        <el-table-column prop="grade" label="成绩" width="80" align="center" />
+        <el-table-column label="答辩状态" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="getDefenseStatusType(row.defenseStatus)">
               {{ getDefenseStatusText(row.defenseStatus) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column fixed="right" label="操作" width="120" align="center">
           <template #default="{ row }">
             <el-button size="small" type="primary" link @click="handleView(row)">查看</el-button>
           </template>
@@ -67,20 +96,36 @@
     
     <!-- 详情对话框 -->
     <el-dialog v-model="detailDialogVisible" title="答辩安排详情" width="800px">
-      <el-descriptions :column="2" border>
-        <el-descriptions-item label="安排 ID">{{ currentDefense.id }}</el-descriptions-item>
-        <el-descriptions-item label="项目 ID">{{ currentDefense.projectId }}</el-descriptions-item>
-        <el-descriptions-item label="学生姓名">{{ currentDefense.studentName }}</el-descriptions-item>
-        <el-descriptions-item label="学生学号">{{ currentDefense.studentAccount }}</el-descriptions-item>
-        <el-descriptions-item label="系部编号">{{ currentDefense.deptCode }}</el-descriptions-item>
-        <el-descriptions-item label="系部名称">{{ currentDefense.deptName }}</el-descriptions-item>
+      <!-- 答辩安排信息 -->
+      <el-descriptions title="答辩安排信息" :column="2" border>
+        <el-descriptions-item label="安排ID">{{ currentDefense.id }}</el-descriptions-item>
+        <el-descriptions-item label="项目ID">{{ currentDefense.projectId }}</el-descriptions-item>
+        <el-descriptions-item label="系部编号">{{ currentDefense.deptCode || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="所属系部">{{ currentDefense.deptName || '无' }}</el-descriptions-item>
         <el-descriptions-item label="答辩地点">{{ currentDefense.defensePlace }}</el-descriptions-item>
         <el-descriptions-item label="答辩时间">{{ currentDefense.defenseTime }}</el-descriptions-item>
-        <el-descriptions-item label="指导教师">{{ currentDefense.teacherName }}</el-descriptions-item>
-        <el-descriptions-item label="教师工号">{{ currentDefense.teacherAccount }}</el-descriptions-item>
         <el-descriptions-item label="答辩状态">{{ getDefenseStatusText(currentDefense.defenseStatus) }}</el-descriptions-item>
-        <el-descriptions-item label="评委名单" :span="2">{{ currentDefense.judgeNames }}</el-descriptions-item>
+        <el-descriptions-item label="成绩">{{ currentDefense.grade || '无' }}</el-descriptions-item>
       </el-descriptions>
+      <el-descriptions :column="1" border style="margin-top: 20px;">
+        <el-descriptions-item label="评委ID">{{ currentDefense.judgeIds || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="评委名单">{{ currentDefense.judgeNames || '无' }}</el-descriptions-item>
+      </el-descriptions>
+      
+      <!-- 导师信息 -->
+      <el-descriptions title="导师信息" :column="2" border style="margin-top: 20px;">
+        <el-descriptions-item label="指导教师">{{ currentDefense.teacherName }}</el-descriptions-item>
+        <el-descriptions-item label="教师账号">{{ currentDefense.teacherAccount }}</el-descriptions-item>
+        <el-descriptions-item label="导师ID">{{ currentDefense.teacherId }}</el-descriptions-item>
+      </el-descriptions>
+      
+      <!-- 学生信息 -->
+      <el-descriptions title="学生信息" :column="2" border style="margin-top: 20px;">
+        <el-descriptions-item label="学生">{{ currentDefense.studentName }}</el-descriptions-item>
+        <el-descriptions-item label="学生学号">{{ currentDefense.studentAccount }}</el-descriptions-item>
+        <el-descriptions-item label="学生ID">{{ currentDefense.studentId }}</el-descriptions-item>
+      </el-descriptions>
+      
       <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
       </template>
@@ -97,7 +142,8 @@ import { post } from '@/utils/request'
 const searchForm = reactive({
   deptCode: '',
   studentId: '',
-  defenseStatus: ''
+  defenseStatus: '',
+  deptName: ''
 })
 
 // 数据列表
@@ -129,7 +175,7 @@ const getDefenseList = async () => {
     
     const response = await post('/defenseArrangement/getDefenseArrangement', params)
     if (response?.status === 'success') {
-      defenseList.value = response.data?.list || []
+      defenseList.value = response.data?.records || []
       total.value = response.data?.total || 0
     }
   } catch (error) {
@@ -156,17 +202,19 @@ const handleReset = () => {
 }
 
 // 分页处理
-const handleSizeChange = () => {
+const handleSizeChange = (val) => {
+  pageSize.value = val
   getDefenseList()
 }
 
-const handleCurrentChange = () => {
+const handleCurrentChange = (val) => {
+  currentPage.value = val
   getDefenseList()
 }
 
 // 查看详情
 const handleView = (row) => {
-  currentDefense.value = row
+  currentDefense.value = { ...row }
   detailDialogVisible.value = true
 }
 
@@ -193,10 +241,12 @@ onMounted(() => {
 
 .card-header {
   font-weight: bold;
-  font-size: 16px;
 }
 
 .search-form {
+  background-color: #f5f7fa;
+  padding: 15px;
+  border-radius: 4px;
   margin-bottom: 20px;
 }
 </style>

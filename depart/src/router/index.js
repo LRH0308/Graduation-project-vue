@@ -32,6 +32,31 @@ const routes = [
         name: "DefenseArrange",
         component: () => import("@/views/defense/DefenseArrange.vue"),
       },
+      {
+        path: "openingReport/list",
+        name: "OpeningReport",
+        component: () => import("@/views/openingReport/OpeningReport.vue"),
+      },
+      {
+        path: "midtermCheck/list",
+        name: "MidtermCheck",
+        component: () => import("@/views/midtermCheck/MidtermCheck.vue"),
+      },
+      {
+        path: "thesisDraft/list",
+        name: "ThesisDraft",
+        component: () => import("@/views/thesisDraft/ThesisDraft.vue"),
+      },
+      {
+        path: "thesisFinal/list",
+        name: "ThesisFinal",
+        component: () => import("@/views/thesisFinal/ThesisFinal.vue"),
+      },
+      {
+        path: "processGuidance/list",
+        name: "ProcessGuidanceRecord",
+        component: () => import("@/views/processGuidance/ProcessGuidanceRecord.vue"),
+      },
     ],
   },
 ];

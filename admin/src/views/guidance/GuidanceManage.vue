@@ -8,30 +8,65 @@
       </template>
       
       <!-- 搜索表单 -->
-      <el-form :model="searchForm" :inline="true" class="search-form">
-        <el-form-item label="学生 ID">
-          <el-input v-model="searchForm.studentId" placeholder="请输入学生 ID" clearable />
-        </el-form-item>
-        <el-form-item label="教师 ID">
-          <el-input v-model="searchForm.teacherId" placeholder="请输入教师 ID" clearable />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="handleReset">重置</el-button>
-        </el-form-item>
+      <el-form :model="searchForm" label-width="80px" size="small" class="search-form">
+        <el-row :gutter="20">
+          <el-col :span="6">
+            <el-form-item label="系部">
+              <el-input v-model="searchForm.deptName" placeholder="请输入系部名称" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="导师">
+              <el-input v-model="searchForm.teacherId" placeholder="请输入导师ID" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="学生">
+              <el-input v-model="searchForm.studentId" placeholder="请输入学生ID" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="项目ID">
+              <el-input v-model="searchForm.projectId" placeholder="请输入项目ID" clearable />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12" style="text-align: right;">
+            <el-button type="primary" @click="handleSearch">查询</el-button>
+            <el-button @click="handleReset">重置</el-button>
+          </el-col>
+        </el-row>
       </el-form>
       
       <!-- 数据表格 -->
-      <el-table :data="guidanceList" v-loading="loading" border stripe>
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="projectId" label="项目 ID" width="100" />
-        <el-table-column prop="studentName" label="学生姓名" width="120" />
-        <el-table-column prop="studentAccount" label="学号" width="130" />
-        <el-table-column prop="teacherName" label="指导教师" width="120" />
-        <el-table-column prop="teacherAccount" label="教师工号" width="120" />
-        <el-table-column prop="guidanceTime" label="指导时间" width="180" />
-        <el-table-column prop="guidanceContent" label="指导内容" min-width="200" show-overflow-tooltip />
-        <el-table-column label="操作" width="120" fixed="right">
+      <el-table 
+        :data="guidanceList" 
+        border 
+        style="width: 100%; margin-top: 20px;"
+        v-loading="loading"
+        align="center"
+      >
+        <el-table-column prop="id" label="ID" width="60" align="center" />
+        <el-table-column prop="deptName" label="所属系部" width="120" align="center" />
+        <el-table-column prop="projectId" label="项目ID" width="80" align="center" />
+        <el-table-column label="工号/导师名" width="150" align="center">
+          <template #default="{ row }">
+            {{ row.teacherAccount }}/{{ row.teacherName }}
+          </template>
+        </el-table-column>
+        <el-table-column label="学号/学生名" width="150" align="center">
+          <template #default="{ row }">
+            {{ row.studentAccount ? `${row.studentAccount}/${row.studentName}` : '未分配' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="guidanceTime" label="指导时间" width="160" align="center" />
+        <el-table-column prop="feedbackTime" label="反馈时间" width="160" align="center">
+          <template #default="{ row }">
+            {{ row.feedbackTime || '未反馈' }}
+          </template>
+        </el-table-column>
+        <el-table-column fixed="right" label="操作" width="120" align="center">
           <template #default="{ row }">
             <el-button size="small" type="primary" link @click="handleView(row)">查看</el-button>
           </template>
@@ -53,13 +88,12 @@
     
     <!-- 详情对话框 -->
     <el-dialog v-model="detailDialogVisible" title="指导记录详情" width="800px">
-      <el-descriptions :column="2" border>
-        <el-descriptions-item label="记录 ID">{{ currentGuidance.id }}</el-descriptions-item>
-        <el-descriptions-item label="项目 ID">{{ currentGuidance.projectId }}</el-descriptions-item>
-        <el-descriptions-item label="学生姓名">{{ currentGuidance.studentName }}</el-descriptions-item>
-        <el-descriptions-item label="学生学号">{{ currentGuidance.studentAccount }}</el-descriptions-item>
-        <el-descriptions-item label="指导教师">{{ currentGuidance.teacherName }}</el-descriptions-item>
-        <el-descriptions-item label="教师工号">{{ currentGuidance.teacherAccount }}</el-descriptions-item>
+      <!-- 指导记录信息 -->
+      <el-descriptions title="指导记录信息" :column="2" border>
+        <el-descriptions-item label="记录ID">{{ currentGuidance.id }}</el-descriptions-item>
+        <el-descriptions-item label="项目ID">{{ currentGuidance.projectId }}</el-descriptions-item>
+        <el-descriptions-item label="系部编号">{{ currentGuidance.deptCode || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="所属系部">{{ currentGuidance.deptName || '无' }}</el-descriptions-item>
         <el-descriptions-item label="指导时间">{{ currentGuidance.guidanceTime }}</el-descriptions-item>
         <el-descriptions-item label="反馈时间">{{ currentGuidance.feedbackTime || '未反馈' }}</el-descriptions-item>
       </el-descriptions>
@@ -67,6 +101,21 @@
         <el-descriptions-item label="指导内容">{{ currentGuidance.guidanceContent || '无' }}</el-descriptions-item>
         <el-descriptions-item label="学生反馈">{{ currentGuidance.studentFeedback || '无' }}</el-descriptions-item>
       </el-descriptions>
+      
+      <!-- 导师信息 -->
+      <el-descriptions title="导师信息" :column="2" border style="margin-top: 20px;">
+        <el-descriptions-item label="指导教师">{{ currentGuidance.teacherName }}</el-descriptions-item>
+        <el-descriptions-item label="教师账号">{{ currentGuidance.teacherAccount }}</el-descriptions-item>
+        <el-descriptions-item label="导师ID">{{ currentGuidance.teacherId }}</el-descriptions-item>
+      </el-descriptions>
+      
+      <!-- 学生信息 -->
+      <el-descriptions title="学生信息" :column="2" border style="margin-top: 20px;">
+        <el-descriptions-item label="学生">{{ currentGuidance.studentName }}</el-descriptions-item>
+        <el-descriptions-item label="学生学号">{{ currentGuidance.studentAccount }}</el-descriptions-item>
+        <el-descriptions-item label="学生ID">{{ currentGuidance.studentId }}</el-descriptions-item>
+      </el-descriptions>
+      
       <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
       </template>
@@ -82,7 +131,9 @@ import { post } from '@/utils/request'
 // 搜索表单
 const searchForm = reactive({
   studentId: '',
-  teacherId: ''
+  teacherId: '',
+  deptName: '',
+  projectId: ''
 })
 
 // 数据列表
@@ -114,7 +165,7 @@ const getGuidanceList = async () => {
     
     const response = await post('/processGuidanceRecord/getProcessGuidanceRecord', params)
     if (response?.status === 'success') {
-      guidanceList.value = response.data?.list || []
+      guidanceList.value = response.data?.records || []
       total.value = response.data?.total || 0
     }
   } catch (error) {
@@ -141,17 +192,19 @@ const handleReset = () => {
 }
 
 // 分页处理
-const handleSizeChange = () => {
+const handleSizeChange = (val) => {
+  pageSize.value = val
   getGuidanceList()
 }
 
-const handleCurrentChange = () => {
+const handleCurrentChange = (val) => {
+  currentPage.value = val
   getGuidanceList()
 }
 
 // 查看详情
 const handleView = (row) => {
-  currentGuidance.value = row
+  currentGuidance.value = { ...row }
   detailDialogVisible.value = true
 }
 
@@ -167,10 +220,21 @@ onMounted(() => {
 
 .card-header {
   font-weight: bold;
-  font-size: 16px;
 }
 
 .search-form {
+  background-color: #f5f7fa;
+  padding: 15px;
+  border-radius: 4px;
   margin-bottom: 20px;
+}
+
+:deep(.el-table) {
+  border-left: 1px solid #ebeef5;
+}
+
+:deep(.el-table th.el-table__cell:first-child),
+:deep(.el-table td.el-table__cell:first-child) {
+  border-left: 1px solid #ebeef5;
 }
 </style>

@@ -5,7 +5,12 @@
 1. [账号管理](#1-账号管理)
 2. [选题管理](#2-选题管理)
 3. [任务书](#3-任务书)
-4. [答辩安排](#4-答辩安排)
+4. [开题报告](#4-开题报告)
+5. [中期检查](#5-中期检查)
+6. [论文初稿](#6-论文初稿)
+7. [论文终稿](#7-论文终稿)
+8. [答辩安排](#8-答辩安排)
+9. [过程指导记录](#9-过程指导记录)
 
 ---
 
@@ -448,7 +453,341 @@ Authorization: Bearer {token}
 
 ---
 
-## 4. 答辩安排
+## 4. 开题报告
+
+### 4.1 获取开题报告信息
+
+**接口路径：** `POST /openingReport/getOpeningReport`
+
+**作用：** 查看本系所有开题报告提交和审核情况
+
+**请求方式：** POST
+
+**Content-Type:** `application/json`
+
+**请求头：**
+```
+Authorization: Bearer {token}
+```
+
+**请求参数：**
+```json
+{
+  "deptName": "计算机系",
+  "pageNum": 1,
+  "pageSize": 10
+}
+```
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| deptName | String | 否 | 系部名称（自动填充） |
+| pageNum | Integer | 否 | 页码，默认 1 |
+| pageSize | Integer | 否 | 每页数量，默认 10 |
+
+**返回参数：**
+```json
+{
+  "status": "success",
+  "code": 200,
+  "info": "操作成功",
+  "data": {
+    "records": [
+      {
+        "id": 1,
+        "projectId": 5,
+        "fileId": 2,
+        "fileName": "开题报告.docx",
+        "studentId": 1,
+        "studentAccount": "2022001",
+        "studentName": "张三",
+        "submitTime": "2025-03-15 14:30:00",
+        "auditStatus": 1,
+        "teacherId": 10,
+        "teacherName": "赵老师",
+        "auditTime": "2025-03-16 09:00:00",
+        "auditRemark": "同意开题"
+      }
+    ],
+    "total": 50,
+    "size": 10,
+    "current": 1,
+    "pages": 5
+  }
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | Integer | 主键 ID |
+| projectId | Integer | 毕业设计 ID |
+| fileId | Integer | 文件 ID |
+| fileName | String | 文件名 |
+| studentId | Integer | 学生 ID |
+| studentAccount | String | 学生学号 |
+| studentName | String | 学生姓名 |
+| submitTime | Date | 提交时间 |
+| auditStatus | Integer | 审核状态：1-通过，2-不通过 |
+| teacherId | Integer | 导师 ID |
+| teacherName | String | 导师姓名 |
+| auditTime | Date | 审核时间 |
+| auditRemark | String | 审核意见 |
+
+---
+
+## 5. 中期检查
+
+### 5.1 获取中期检查信息
+
+**接口路径：** `POST /midtermCheck/getMidtermCheck`
+
+**作用：** 查看本系所有中期检查提交和评分情况
+
+**请求方式：** POST
+
+**Content-Type:** `application/json`
+
+**请求头：**
+```
+Authorization: Bearer {token}
+```
+
+**请求参数：**
+```json
+{
+  "deptName": "计算机系",
+  "pageNum": 1,
+  "pageSize": 10
+}
+```
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| deptName | String | 否 | 系部名称（自动填充） |
+| pageNum | Integer | 否 | 页码，默认 1 |
+| pageSize | Integer | 否 | 每页数量，默认 10 |
+
+**返回参数：**
+```json
+{
+  "status": "success",
+  "code": 200,
+  "info": "操作成功",
+  "data": {
+    "records": [
+      {
+        "id": 1,
+        "projectId": 5,
+        "fileId": 3,
+        "fileName": "中期报告.pdf",
+        "studentId": 1,
+        "studentAccount": "2022001",
+        "studentName": "张三",
+        "submitTime": "2025-04-10 16:00:00",
+        "auditStatus": 1,
+        "teacherId": 10,
+        "teacherName": "赵老师",
+        "auditTime": "2025-04-11 10:00:00",
+        "auditRemark": "进度良好，继续保持",
+        "score": 85.50
+      }
+    ],
+    "total": 50,
+    "size": 10,
+    "current": 1,
+    "pages": 5
+  }
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | Integer | 主键 ID |
+| projectId | Integer | 毕业设计 ID |
+| fileId | Integer | 文件 ID |
+| fileName | String | 文件名 |
+| studentId | Integer | 学生 ID |
+| studentAccount | String | 学生学号 |
+| studentName | String | 学生姓名 |
+| submitTime | Date | 提交时间 |
+| auditStatus | Integer | 审核状态：1-通过，2-不通过 |
+| teacherId | Integer | 导师 ID |
+| teacherName | String | 导师姓名 |
+| auditTime | Date | 审核时间 |
+| auditRemark | String | 审核意见 |
+| score | BigDecimal | 评分 |
+
+---
+
+## 6. 论文初稿
+
+### 6.1 获取论文初稿信息
+
+**接口路径：** `POST /ThesisDraft/getThesisDraft`
+
+**作用：** 查看本系所有论文初稿提交和评阅情况
+
+**请求方式：** POST
+
+**Content-Type:** `application/json`
+
+**请求头：**
+```
+Authorization: Bearer {token}
+```
+
+**请求参数：**
+```json
+{
+  "deptName": "计算机系",
+  "pageNum": 1,
+  "pageSize": 10
+}
+```
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| deptName | String | 否 | 系部名称（自动填充） |
+| pageNum | Integer | 否 | 页码，默认 1 |
+| pageSize | Integer | 否 | 每页数量，默认 10 |
+
+**返回参数：**
+```json
+{
+  "status": "success",
+  "code": 200,
+  "info": "操作成功",
+  "data": {
+    "records": [
+      {
+        "id": 1,
+        "projectId": 5,
+        "fileId": 4,
+        "fileName": "论文初稿.docx",
+        "studentId": 1,
+        "studentAccount": "2022001",
+        "studentName": "张三",
+        "submitTime": "2025-05-01 10:00:00",
+        "adutisStatus": 1,
+        "teacherId": 10,
+        "teacherName": "赵老师",
+        "adutisTime": "2025-05-03 14:00:00",
+        "adutisRemark": "论文结构合理，建议增加实验对比",
+        "duplicateCheckStatus": 1,
+        "duplicateCheckRate": 12.50,
+        "formatCheckStatus": 1
+      }
+    ],
+    "total": 50,
+    "size": 10,
+    "current": 1,
+    "pages": 5
+  }
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | Integer | 主键 ID |
+| projectId | Integer | 毕业设计 ID |
+| fileId | Integer | 文件 ID |
+| fileName | String | 文件名 |
+| studentId | Integer | 学生 ID |
+| studentAccount | String | 学生学号 |
+| studentName | String | 学生姓名 |
+| submitTime | Date | 提交时间 |
+| adutisStatus | Integer | 审核状态：1-通过，2-不通过 |
+| teacherId | Integer | 导师 ID |
+| teacherName | String | 导师姓名 |
+| adutisTime | Date | 审核时间 |
+| adutisRemark | String | 审核意见 |
+| duplicateCheckStatus | Integer | 查重状态：1-已查重，2-未查重 |
+| duplicateCheckRate | BigDecimal | 查重率 |
+| formatCheckStatus | Integer | 格式检查状态：1-合格，2-不合格 |
+
+---
+
+## 7. 论文终稿
+
+### 7.1 获取论文终稿信息
+
+**接口路径：** `POST /ThesisFinal/getThesisFinalList`
+
+**作用：** 查看本系所有论文终稿提交情况
+
+**请求方式：** POST
+
+**Content-Type:** `application/json`
+
+**请求头：**
+```
+Authorization: Bearer {token}
+```
+
+**请求参数：**
+```json
+{
+  "deptName": "计算机系",
+  "pageNum": 1,
+  "pageSize": 10
+}
+```
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| deptName | String | 否 | 系部名称（自动填充） |
+| pageNum | Integer | 否 | 页码，默认 1 |
+| pageSize | Integer | 否 | 每页数量，默认 10 |
+
+**返回参数：**
+```json
+{
+  "status": "success",
+  "code": 200,
+  "info": "操作成功",
+  "data": {
+    "records": [
+      {
+        "id": 1,
+        "projectId": 5,
+        "studentId": 1,
+        "tutorId": 10,
+        "finalFileId": 123,
+        "fileType": 1,
+        "viewUrl": "/files/thesis/final_123.pdf",
+        "finalTitle": "基于 Spring Boot 的毕业设计管理系统",
+        "finalKeywords": "Spring Boot;毕业设计;管理系统",
+        "finalAbstract": "本文设计并实现了一个...",
+        "finalStatus": 1,
+        "submitTime": "2025-05-20 10:00:00"
+      }
+    ],
+    "total": 50,
+    "size": 10,
+    "current": 1,
+    "pages": 5
+  }
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | Integer | 主键 ID |
+| projectId | Integer | 毕业设计 ID |
+| studentId | Integer | 学生 ID |
+| tutorId | Integer | 导师 ID |
+| finalFileId | Integer | 终稿文件 ID |
+| fileType | Integer | 文件类型 |
+| viewUrl | String | 在线查看地址 |
+| finalTitle | String | 论文最终标题 |
+| finalKeywords | String | 最终关键词 |
+| finalAbstract | String | 最终摘要 |
+| finalStatus | Integer | 状态：1-正常，2-已归档 |
+| submitTime | Date | 提交时间 |
+
+---
+
+## 8. 答辩安排
 
 ### 4.1 获取答辩安排信息
 
@@ -582,6 +921,84 @@ Authorization: Bearer {token}
   "data": null
 }
 ```
+
+---
+
+## 9. 过程指导记录
+
+### 9.1 获取过程指导记录信息
+
+**接口路径：** `POST /processGuidanceRecord/getProcessGuidanceRecord`
+
+**作用：** 查看本系所有指导记录和学生反馈情况
+
+**请求方式：** POST
+
+**Content-Type:** `application/json`
+
+**请求头：**
+```
+Authorization: Bearer {token}
+```
+
+**请求参数：**
+```json
+{
+  "deptName": "计算机系",
+  "pageNum": 1,
+  "pageSize": 10
+}
+```
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| deptName | String | 否 | 系部名称（自动填充） |
+| pageNum | Integer | 否 | 页码，默认 1 |
+| pageSize | Integer | 否 | 每页数量，默认 10 |
+
+**返回参数：**
+```json
+{
+  "status": "success",
+  "code": 200,
+  "info": "操作成功",
+  "data": {
+    "records": [
+      {
+        "id": 1,
+        "projectId": 5,
+        "teacherId": 10,
+        "teacherName": "赵老师",
+        "guidanceTime": "2025-03-20 14:00:00",
+        "guidanceContent": "指导学生完成系统需求分析和技术方案设计",
+        "studentId": 1,
+        "studentAccount": "2022001",
+        "studentName": "张三",
+        "feedbackTime": "2025-03-20 16:00:00",
+        "studentFeedback": "已完成需求分析和技术方案设计"
+      }
+    ],
+    "total": 100,
+    "size": 10,
+    "current": 1,
+    "pages": 10
+  }
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | Integer | 主键 ID |
+| projectId | Integer | 毕业设计 ID |
+| teacherId | Integer | 导师 ID |
+| teacherName | String | 导师姓名 |
+| guidanceTime | Date | 指导时间 |
+| guidanceContent | String | 指导内容 |
+| studentId | Integer | 学生 ID |
+| studentAccount | String | 学生学号 |
+| studentName | String | 学生姓名 |
+| feedbackTime | Date | 反馈时间 |
+| studentFeedback | String | 学生反馈 |
 
 ---
 

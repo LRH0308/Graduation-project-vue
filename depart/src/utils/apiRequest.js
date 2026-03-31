@@ -83,6 +83,46 @@ export const defenseApi = {
     apiCall(API.DEFENSE_ARRANGEMENT.DEPT_ARRANGE, data, config),
 };
 
+// ==================== 开题报告接口 ====================
+
+export const openingReportApi = {
+  // 获取开题报告信息（需要 Token）
+  getOpeningReport: (data = {}, config = {}) =>
+    apiCall(API.OPENING_REPORT.GET_OPENING_REPORT, data, config),
+};
+
+// ==================== 中期检查接口 ====================
+
+export const midtermCheckApi = {
+  // 获取中期检查信息（需要 Token）
+  getMidtermCheck: (data = {}, config = {}) =>
+    apiCall(API.MIDTERM_CHECK.GET_MIDTERM_CHECK, data, config),
+};
+
+// ==================== 论文初稿接口 ====================
+
+export const thesisDraftApi = {
+  // 获取论文初稿信息（需要 Token）
+  getThesisDraft: (data = {}, config = {}) =>
+    apiCall(API.THESIS_DRAFT.GET_THESIS_DRAFT, data, config),
+};
+
+// ==================== 论文终稿接口 ====================
+
+export const thesisFinalApi = {
+  // 获取论文终稿信息（需要 Token）
+  getThesisFinalList: (data = {}, config = {}) =>
+    apiCall(API.THESIS_FINAL.GET_THESIS_FINAL_LIST, data, config),
+};
+
+// ==================== 过程指导记录接口 ====================
+
+export const processGuidanceApi = {
+  // 获取过程指导记录信息（需要 Token）
+  getProcessGuidanceRecord: (data = {}, config = {}) =>
+    apiCall(API.PROCESS_GUIDANCE_RECORD.GET_PROCESS_GUIDANCE_RECORD, data, config),
+};
+
 // ==================== 文件管理接口 ====================
 
 export const fileApi = {

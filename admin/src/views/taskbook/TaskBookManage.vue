@@ -11,25 +11,32 @@
       <el-form :model="searchForm" label-width="80px" size="small" class="search-form">
         <el-row :gutter="20">
           <el-col :span="6">
-            <el-form-item label="学生ID">
-              <el-input v-model="searchForm.studentId" placeholder="请输入学生ID" clearable />
+            <el-form-item label="系部">
+              <el-input v-model="searchForm.deptName" placeholder="请输入系部名称" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item label="导师ID">
+            <el-form-item label="导师">
               <el-input v-model="searchForm.teacherId" placeholder="请输入导师ID" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="学生">
+              <el-input v-model="searchForm.studentId" placeholder="请输入学生ID" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="6">
             <el-form-item label="审核状态">
               <el-select v-model="searchForm.auditStatus" placeholder="请选择" clearable>
                 <el-option :value="0" label="待审核" />
-                <el-option :value="1" label="审核通过" />
-                <el-option :value="2" label="审核驳回" />
+                <el-option :value="1" label="已通过" />
+                <el-option :value="2" label="不通过" />
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="6" style="text-align: right;">
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12" style="text-align: right;">
             <el-button type="primary" @click="handleSearch">查询</el-button>
             <el-button @click="handleReset">重置</el-button>
           </el-col>
@@ -42,30 +49,36 @@
         border 
         style="width: 100%; margin-top: 20px;"
         v-loading="loading"
+        align="center"
       >
-        <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column prop="projectId" label="项目ID" width="80" />
-        <el-table-column prop="projectName" label="项目名称" min-width="200" />
-        <el-table-column prop="studentName" label="学生姓名" width="100" />
-        <el-table-column prop="studentAccount" label="学生学号" width="120" />
-        <el-table-column prop="teacherName" label="指导教师" width="100" />
-        <el-table-column prop="submitTime" label="提交时间" width="160" />
-        <el-table-column label="导师审核" width="100">
+        <el-table-column prop="id" label="ID" width="60" align="center" />
+        <el-table-column prop="projectName" label="项目名称" min-width="200" align="center" />
+        <el-table-column prop="deptName" label="所属系部" width="120" align="center" />
+        <el-table-column label="工号/导师名" width="150" align="center">
           <template #default="{ row }">
-            <el-tag :type="getTeacherAuditStatusType(row.auditStatus)">
-              {{ getTeacherAuditStatusText(row.auditStatus) }}
+            {{ row.teacherAccount }}/{{ row.teacherName }}
+          </template>
+        </el-table-column>
+        <el-table-column label="学号/学生名" width="150" align="center">
+          <template #default="{ row }">
+            {{ row.studentAccount ? `${row.studentAccount}/${row.studentName}` : '未分配' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="submitTime" label="提交时间" width="160" align="center" />
+        <el-table-column label="工号/系主任" width="150" align="center">
+          <template #default="{ row }">
+            {{ row.auditAccount }}/{{ row.auditName }}
+          </template>
+        </el-table-column>
+        <el-table-column label="审核状态" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="getAuditStatusType(row.auditStatus)">
+              {{ getAuditStatusText(row.auditStatus) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="系主任审核" width="120">
-          <template #default="{ row }">
-            <el-tag :type="getDepartAuditStatusType(row.departAuditStatus)">
-              {{ getDepartAuditStatusText(row.departAuditStatus) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="departAuditTime" label="审核时间" width="160" />
-        <el-table-column fixed="right" label="操作" width="120">
+        <el-table-column prop="auditTime" label="审核时间" width="160" align="center" />
+        <el-table-column fixed="right" label="操作" width="120" align="center">
           <template #default="{ row }">
             <el-button size="small" type="primary" link @click="handleView(row)">查看</el-button>
           </template>
@@ -87,28 +100,41 @@
     
     <!-- 详情对话框 -->
     <el-dialog v-model="detailDialogVisible" title="任务书详情" width="800px">
-      <el-descriptions :column="2" border>
+      <!-- 任务书信息 -->
+      <el-descriptions title="任务书信息" :column="2" border>
         <el-descriptions-item label="任务书ID">{{ currentTaskBook.id }}</el-descriptions-item>
-        <el-descriptions-item label="项目ID">{{ currentTaskBook.projectId }}</el-descriptions-item>
-        <el-descriptions-item label="项目名称">{{ currentTaskBook.projectName }}</el-descriptions-item>
-        <el-descriptions-item label="学生姓名">{{ currentTaskBook.studentName }}</el-descriptions-item>
-        <el-descriptions-item label="学生学号">{{ currentTaskBook.studentAccount }}</el-descriptions-item>
-        <el-descriptions-item label="指导教师">{{ currentTaskBook.teacherName }}</el-descriptions-item>
-        <el-descriptions-item label="导师ID">{{ currentTaskBook.teacherId }}</el-descriptions-item>
+        <el-descriptions-item label="项目名称">{{ currentTaskBook.projectName || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="系部编号">{{ currentTaskBook.deptCode }}</el-descriptions-item>
+        <el-descriptions-item label="所属系部">{{ currentTaskBook.deptName }}</el-descriptions-item>
+        <el-descriptions-item label="文件ID">{{ currentTaskBook.fileId || '无' }}</el-descriptions-item>
         <el-descriptions-item label="提交时间">{{ currentTaskBook.submitTime }}</el-descriptions-item>
-        <el-descriptions-item label="导师审核">{{ getTeacherAuditStatusText(currentTaskBook.auditStatus) }}</el-descriptions-item>
-        <el-descriptions-item label="导师审核时间">{{ currentTaskBook.auditTime || '未审核' }}</el-descriptions-item>
-        <el-descriptions-item label="系主任审核">{{ getDepartAuditStatusText(currentTaskBook.departAuditStatus) }}</el-descriptions-item>
-        <el-descriptions-item label="系主任审核时间">{{ currentTaskBook.departAuditTime || '未审核' }}</el-descriptions-item>
+        <el-descriptions-item label="审核状态">{{ getAuditStatusText(currentTaskBook.auditStatus) }}</el-descriptions-item>
+        <el-descriptions-item label="审核时间">{{ currentTaskBook.auditTime || '未审核' }}</el-descriptions-item>
       </el-descriptions>
       <el-descriptions :column="1" border style="margin-top: 20px;">
         <el-descriptions-item label="设计内容">{{ currentTaskBook.content || '无' }}</el-descriptions-item>
-        <el-descriptions-item label="设计目标">{{ currentTaskBook.target || '无' }}</el-descriptions-item>
-        <el-descriptions-item label="进度安排">{{ currentTaskBook.schedule || '无' }}</el-descriptions-item>
         <el-descriptions-item label="参考文献">{{ currentTaskBook.reference || '无' }}</el-descriptions-item>
-        <el-descriptions-item label="导师审核意见">{{ currentTaskBook.auditRemark || '无' }}</el-descriptions-item>
-        <el-descriptions-item label="系主任审核意见">{{ currentTaskBook.departAuditRemark || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="审核意见">{{ currentTaskBook.auditRemark || '无' }}</el-descriptions-item>
       </el-descriptions>
+      
+      <!-- 导师信息 -->
+      <el-descriptions title="导师信息" :column="2" border style="margin-top: 20px;">
+        <el-descriptions-item label="指导教师">{{ currentTaskBook.teacherName }}</el-descriptions-item>
+        <el-descriptions-item label="教师账号">{{ currentTaskBook.teacherAccount }}</el-descriptions-item>
+      </el-descriptions>
+      
+      <!-- 学生信息 -->
+      <el-descriptions title="学生信息" :column="2" border style="margin-top: 20px;">
+        <el-descriptions-item label="学生">{{ currentTaskBook.studentName }}</el-descriptions-item>
+        <el-descriptions-item label="学生账号">{{ currentTaskBook.studentAccount }}</el-descriptions-item>
+      </el-descriptions>
+      
+      <!-- 审核信息 -->
+      <el-descriptions title="审核信息" :column="2" border style="margin-top: 20px;">
+        <el-descriptions-item label="审核人">{{ currentTaskBook.auditName }}</el-descriptions-item>
+        <el-descriptions-item label="审核人账号">{{ currentTaskBook.auditAccount }}</el-descriptions-item>
+      </el-descriptions>
+      
       <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
       </template>
@@ -123,8 +149,9 @@ import { post } from '@/utils/request'
 
 // 搜索表单
 const searchForm = reactive({
-  studentId: '',
+  deptName: '',
   teacherId: '',
+  studentId: '',
   auditStatus: ''
 })
 
@@ -157,7 +184,7 @@ const getTaskBookList = async () => {
     
     const response = await post('/taskBook/getTaskBook', params)
     if (response?.status === 'success') {
-      taskBookList.value = response.data?.list || []
+      taskBookList.value = response.data?.records || []
       total.value = response.data?.total || 0
     }
   } catch (error) {
@@ -201,22 +228,12 @@ const handleView = (row) => {
 }
 
 // 状态文本映射
-const getTeacherAuditStatusText = (status) => {
-  const map = { 1: '已通过', 2: '不通过' }
+const getAuditStatusText = (status) => {
+  const map = { 0: '待审核', 1: '已通过', 2: '不通过' }
   return map[status] || '未知'
 }
 
-const getTeacherAuditStatusType = (status) => {
-  const map = { 1: 'success', 2: 'danger' }
-  return map[status] || 'info'
-}
-
-const getDepartAuditStatusText = (status) => {
-  const map = { 0: '待审核', 1: '通过', 2: '不通过' }
-  return map[status] || '未知'
-}
-
-const getDepartAuditStatusType = (status) => {
+const getAuditStatusType = (status) => {
   const map = { 0: 'warning', 1: 'success', 2: 'danger' }
   return map[status] || 'info'
 }

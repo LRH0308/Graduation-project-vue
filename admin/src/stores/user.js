@@ -14,14 +14,21 @@ export const useUserStore = defineStore("user", {
   },
 
   actions: {
+    // 清除用户状态
+    clearUserState() {
+      this.token = "";
+      this.userInfo = null;
+      localStorage.removeItem("token");
+    },
+
     // 获取验证码（参考 student 端实现）
-    async getCaptcha() {
+    async checkCode(config = {}) {
       try {
-        const response = await userApi.getCaptcha();
-        console.log("getCaptcha 响应:", response);
+        const response = await userApi.checkCode(config);
+        console.log("checkCode 响应:", response);
         return response;
       } catch (error) {
-        console.error("getCaptcha 错误:", error);
+        console.error("checkCode 错误:", error);
         throw error;
       }
     },
@@ -57,9 +64,7 @@ export const useUserStore = defineStore("user", {
     // 退出登录
     async logout() {
       await userApi.logout();
-      this.token = "";
-      this.userInfo = null;
-      localStorage.removeItem("token");
+      this.clearUserState();
     },
 
     // 验证 Token

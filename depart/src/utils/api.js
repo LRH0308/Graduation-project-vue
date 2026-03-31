@@ -46,6 +46,36 @@ export const API = {
     DEPT_ARRANGE: { url: "/defenseArrangement/deptArrange", method: "post" },
   },
 
+  // ==================== 开题报告 ====================
+  OPENING_REPORT: {
+    // 获取开题报告信息
+    GET_OPENING_REPORT: { url: "/openingReport/getOpeningReport", method: "post" },
+  },
+
+  // ==================== 中期检查 ====================
+  MIDTERM_CHECK: {
+    // 获取中期检查信息
+    GET_MIDTERM_CHECK: { url: "/midtermCheck/getMidtermCheck", method: "post" },
+  },
+
+  // ==================== 论文初稿 ====================
+  THESIS_DRAFT: {
+    // 获取论文初稿信息
+    GET_THESIS_DRAFT: { url: "/ThesisDraft/getThesisDraft", method: "post" },
+  },
+
+  // ==================== 论文终稿 ====================
+  THESIS_FINAL: {
+    // 获取论文终稿信息
+    GET_THESIS_FINAL_LIST: { url: "/ThesisFinal/getThesisFinalList", method: "post" },
+  },
+
+  // ==================== 过程指导记录 ====================
+  PROCESS_GUIDANCE_RECORD: {
+    // 获取过程指导记录信息
+    GET_PROCESS_GUIDANCE_RECORD: { url: "/processGuidanceRecord/getProcessGuidanceRecord", method: "post" },
+  },
+
   // ==================== 文件管理 ====================
   FILE: {
     UPLOAD: { url: "/file/upload", method: "post" },

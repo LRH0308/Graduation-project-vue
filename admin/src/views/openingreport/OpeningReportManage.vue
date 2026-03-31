@@ -11,25 +11,32 @@
       <el-form :model="searchForm" label-width="80px" size="small" class="search-form">
         <el-row :gutter="20">
           <el-col :span="6">
-            <el-form-item label="学生ID">
-              <el-input v-model="searchForm.studentId" placeholder="请输入学生ID" clearable />
+            <el-form-item label="系部">
+              <el-input v-model="searchForm.deptName" placeholder="请输入系部名称" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item label="导师ID">
+            <el-form-item label="导师">
               <el-input v-model="searchForm.teacherId" placeholder="请输入导师ID" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="学生">
+              <el-input v-model="searchForm.studentId" placeholder="请输入学生ID" clearable />
             </el-form-item>
           </el-col>
           <el-col :span="6">
             <el-form-item label="审核状态">
               <el-select v-model="searchForm.auditStatus" placeholder="请选择" clearable>
                 <el-option :value="0" label="待审核" />
-                <el-option :value="1" label="审核通过" />
-                <el-option :value="2" label="审核驳回" />
+                <el-option :value="1" label="已通过" />
+                <el-option :value="2" label="不通过" />
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="6" style="text-align: right;">
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12" style="text-align: right;">
             <el-button type="primary" @click="handleSearch">查询</el-button>
             <el-button @click="handleReset">重置</el-button>
           </el-col>
@@ -42,23 +49,31 @@
         border 
         style="width: 100%; margin-top: 20px;"
         v-loading="loading"
+        align="center"
       >
-        <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column prop="projectId" label="项目ID" width="80" />
-        <el-table-column prop="studentName" label="学生姓名" width="100" />
-        <el-table-column prop="studentAccount" label="学生学号" width="120" />
-        <el-table-column prop="teacherName" label="指导教师" width="100" />
-        <el-table-column prop="teacherAccount" label="教师工号" width="120" />
-        <el-table-column prop="submitTime" label="提交时间" width="160" />
-        <el-table-column label="审核状态" width="100">
+        <el-table-column prop="id" label="ID" width="60" align="center" />
+        <el-table-column prop="projectName" label="项目名称" min-width="200" align="center" />
+        <el-table-column prop="deptName" label="所属系部" width="120" align="center" />
+        <el-table-column label="学号/学生名" width="150" align="center">
+          <template #default="{ row }">
+            {{ row.studentAccount ? `${row.studentAccount}/${row.studentName}` : '未分配' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="submitTime" label="提交时间" width="160" align="center" />
+        <el-table-column label="工号/导师名" width="150" align="center">
+          <template #default="{ row }">
+            {{ row.teacherAccount }}/{{ row.teacherName }}
+          </template>
+        </el-table-column>
+        <el-table-column label="审核状态" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="getAuditStatusType(row.auditStatus)">
               {{ getAuditStatusText(row.auditStatus) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="auditTime" label="审核时间" width="160" />
-        <el-table-column fixed="right" label="操作" width="120">
+        <el-table-column prop="auditTime" label="审核时间" width="160" align="center" />
+        <el-table-column fixed="right" label="操作" width="120" align="center">
           <template #default="{ row }">
             <el-button size="small" type="primary" link @click="handleView(row)">查看</el-button>
           </template>
@@ -80,21 +95,35 @@
     
     <!-- 详情对话框 -->
     <el-dialog v-model="detailDialogVisible" title="开题报告详情" width="800px">
-      <el-descriptions :column="2" border>
+      <!-- 开题报告信息 -->
+      <el-descriptions title="开题报告信息" :column="2" border>
         <el-descriptions-item label="报告ID">{{ currentOpeningReport.id }}</el-descriptions-item>
-        <el-descriptions-item label="项目ID">{{ currentOpeningReport.projectId }}</el-descriptions-item>
-        <el-descriptions-item label="学生姓名">{{ currentOpeningReport.studentName }}</el-descriptions-item>
-        <el-descriptions-item label="学生学号">{{ currentOpeningReport.studentAccount }}</el-descriptions-item>
-        <el-descriptions-item label="指导教师">{{ currentOpeningReport.teacherName }}</el-descriptions-item>
-        <el-descriptions-item label="教师工号">{{ currentOpeningReport.teacherAccount }}</el-descriptions-item>
+        <el-descriptions-item label="项目名称">{{ currentOpeningReport.projectName || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="系部编号">{{ currentOpeningReport.deptCode }}</el-descriptions-item>
+        <el-descriptions-item label="所属系部">{{ currentOpeningReport.deptName || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="文件ID">{{ currentOpeningReport.fileId || '无' }}</el-descriptions-item>
         <el-descriptions-item label="提交时间">{{ currentOpeningReport.submitTime }}</el-descriptions-item>
         <el-descriptions-item label="审核状态">{{ getAuditStatusText(currentOpeningReport.auditStatus) }}</el-descriptions-item>
         <el-descriptions-item label="审核时间">{{ currentOpeningReport.auditTime || '未审核' }}</el-descriptions-item>
-        <el-descriptions-item label="审核人">{{ currentOpeningReport.teacherId }}</el-descriptions-item>
       </el-descriptions>
       <el-descriptions :column="1" border style="margin-top: 20px;">
         <el-descriptions-item label="审核备注">{{ currentOpeningReport.auditRemark || '无' }}</el-descriptions-item>
       </el-descriptions>
+      
+      <!-- 导师信息 -->
+      <el-descriptions title="导师信息" :column="2" border style="margin-top: 20px;">
+        <el-descriptions-item label="指导教师">{{ currentOpeningReport.teacherName }}</el-descriptions-item>
+        <el-descriptions-item label="教师账号">{{ currentOpeningReport.teacherAccount }}</el-descriptions-item>
+        <el-descriptions-item label="导师ID">{{ currentOpeningReport.teacherId }}</el-descriptions-item>
+      </el-descriptions>
+      
+      <!-- 学生信息 -->
+      <el-descriptions title="学生信息" :column="2" border style="margin-top: 20px;">
+        <el-descriptions-item label="学生">{{ currentOpeningReport.studentName }}</el-descriptions-item>
+        <el-descriptions-item label="学生账号">{{ currentOpeningReport.studentAccount }}</el-descriptions-item>
+        <el-descriptions-item label="学生ID">{{ currentOpeningReport.studentId }}</el-descriptions-item>
+      </el-descriptions>
+      
       <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
       </template>
@@ -109,8 +138,9 @@ import { post } from '@/utils/request'
 
 // 搜索表单
 const searchForm = reactive({
-  studentId: '',
+  deptName: '',
   teacherId: '',
+  studentId: '',
   auditStatus: ''
 })
 
@@ -143,7 +173,7 @@ const getOpeningReportList = async () => {
     
     const response = await post('/openingReport/getOpeningReport', params)
     if (response?.status === 'success') {
-      openingReportList.value = response.data?.list || []
+      openingReportList.value = response.data?.records || []
       total.value = response.data?.total || 0
     }
   } catch (error) {
@@ -188,7 +218,7 @@ const handleView = (row) => {
 
 // 状态文本映射
 const getAuditStatusText = (status) => {
-  const map = { 0: '待审核', 1: '审核通过', 2: '审核驳回' }
+  const map = { 0: '待审核', 1: '已通过', 2: '不通过' }
   return map[status] || '未知'
 }
 

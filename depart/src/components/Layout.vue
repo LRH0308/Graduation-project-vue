@@ -50,17 +50,42 @@
           
           <el-menu-item index="/subject/audit">
             <el-icon><Document /></el-icon>
-            <span>选题审核</span>
+            <span>选题管理</span>
           </el-menu-item>
           
           <el-menu-item index="/task/audit">
             <el-icon><Reading /></el-icon>
-            <span>任务书审核</span>
+            <span>任务书</span>
+          </el-menu-item>
+
+          <el-menu-item index="/openingReport/list">
+            <el-icon><Document /></el-icon>
+            <span>开题报告</span>
+          </el-menu-item>
+          
+          <el-menu-item index="/midtermCheck/list">
+            <el-icon><Reading /></el-icon>
+            <span>中期检查</span>
+          </el-menu-item>
+          
+          <el-menu-item index="/thesisDraft/list">
+            <el-icon><Document /></el-icon>
+            <span>论文初稿</span>
+          </el-menu-item>
+          
+          <el-menu-item index="/thesisFinal/list">
+            <el-icon><Document /></el-icon>
+            <span>论文终稿</span>
           </el-menu-item>
           
           <el-menu-item index="/defense/arrange">
             <el-icon><Timer /></el-icon>
             <span>答辩安排</span>
+          </el-menu-item>
+          
+          <el-menu-item index="/processGuidance/list">
+            <el-icon><Reading /></el-icon>
+            <span>过程指导记录</span>
           </el-menu-item>
         </el-menu>
       </el-aside>

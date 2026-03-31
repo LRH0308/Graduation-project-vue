@@ -41,7 +41,6 @@
               <el-select v-model="searchForm.publishStatus" placeholder="请选择" clearable>
                 <el-option :value="0" label="未发布" />
                 <el-option :value="1" label="已发布" />
-                <el-option :value="2" label="已下线" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -66,43 +65,41 @@
         border 
         style="width: 100%; margin-top: 20px;"
         v-loading="loading"
+        align="center"
       >
-        <el-table-column prop="id" label="ID" width="60" />
-        <el-table-column prop="projectName" label="课题名称" min-width="200" />
-        <el-table-column prop="projectType" label="课题类型" width="120" />
-        <el-table-column prop="projectSource" label="课题来源" width="120" />
-        <el-table-column prop="projectRequirement" label="课题要求" min-width="250" show-overflow-tooltip />
-        <el-table-column prop="teacherName" label="指导教师" width="120" />
-        <el-table-column label="发布状态" width="100">
+        <el-table-column prop="id" label="ID" width="60" align="center" />
+        <el-table-column prop="deptName" label="系部" width="100" align="center" />
+        <el-table-column prop="topicName" label="课题名称" min-width="200" align="center" />
+        <el-table-column label="工号/导师名" width="150" align="center">
           <template #default="{ row }">
-            <el-tag :type="getPublishStatusType(row.publishStatus)">
-              {{ getPublishStatusText(row.publishStatus) }}
-            </el-tag>
+            {{ row.teacherAccount }}/{{ row.teacherName }}
           </template>
         </el-table-column>
-        <el-table-column label="申请状态" width="100">
+        <el-table-column label="申请状态" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="getApplyStatusType(row.applyStatus)">
               {{ getApplyStatusText(row.applyStatus) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="学生选中状态" width="120">
+        <el-table-column label="工号/系主任" width="150" align="center">
           <template #default="{ row }">
-            <el-tag :type="row.applyStatusStudent ? 'success' : 'warning'">
-              {{ row.applyStatusStudent ? '已被选' : '无人选' }}
+            {{ row.departmentheadAccount }}/{{ row.departmentheadName }}
+          </template>
+        </el-table-column>
+        <el-table-column label="发布状态" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="getPublishStatusType(row.publishStatus)">
+              {{ getPublishStatusText(row.publishStatus) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="系主任审核状态" width="120">
+        <el-table-column label="学号/学生名" width="150" align="center">
           <template #default="{ row }">
-            <el-tag :type="getDeptAuditStatusType(row.deptAuditStatus)">
-              {{ getDeptAuditStatusText(row.deptAuditStatus) }}
-            </el-tag>
+            {{ row.studentAccount ? `${row.studentAccount}/${row.studentName}` : '未分配' }}
           </template>
         </el-table-column>
-        <el-table-column prop="deptAuditTime" label="审核时间" width="160" />
-        <el-table-column fixed="right" label="操作" width="120">
+        <el-table-column fixed="right" label="操作" width="120" align="center">
           <template #default="{ row }">
             <el-button size="small" type="primary" link @click="handleView(row)">查看</el-button>
           </template>
@@ -124,23 +121,48 @@
     
     <!-- 详情对话框 -->
     <el-dialog v-model="detailDialogVisible" title="课题详情" width="800px">
-      <el-descriptions :column="2" border>
+      <!-- 课题信息 -->
+      <el-descriptions title="课题信息" :column="2" border>
         <el-descriptions-item label="课题ID">{{ currentTopic.id }}</el-descriptions-item>
-        <el-descriptions-item label="课题名称">{{ currentTopic.projectName }}</el-descriptions-item>
-        <el-descriptions-item label="课题类型">{{ currentTopic.projectType }}</el-descriptions-item>
-        <el-descriptions-item label="课题来源">{{ currentTopic.projectSource }}</el-descriptions-item>
-        <el-descriptions-item label="指导教师">{{ currentTopic.teacherName }}</el-descriptions-item>
-        <el-descriptions-item label="导师ID">{{ currentTopic.teacherId }}</el-descriptions-item>
-        <el-descriptions-item label="发布状态">{{ getPublishStatusText(currentTopic.publishStatus) }}</el-descriptions-item>
+        <el-descriptions-item label="课题名称">{{ currentTopic.topicName }}</el-descriptions-item>
+        <el-descriptions-item label="系部编号">{{ currentTopic.deptCode }}</el-descriptions-item>
+        <el-descriptions-item label="所属系部">{{ currentTopic.deptName }}</el-descriptions-item>
         <el-descriptions-item label="申请状态">{{ getApplyStatusText(currentTopic.applyStatus) }}</el-descriptions-item>
-        <el-descriptions-item label="学生选中状态">{{ currentTopic.applyStatusStudent ? '已被选' : '无人选' }}</el-descriptions-item>
-        <el-descriptions-item label="系主任审核状态">{{ getDeptAuditStatusText(currentTopic.deptAuditStatus) }}</el-descriptions-item>
-        <el-descriptions-item label="审核时间">{{ currentTopic.deptAuditTime || '未审核' }}</el-descriptions-item>
+        <el-descriptions-item label="申请时间">{{ currentTopic.applyTime || '未申请' }}</el-descriptions-item>
+        <el-descriptions-item label="毕业时间">{{ currentTopic.graduationTime }}</el-descriptions-item>
       </el-descriptions>
       <el-descriptions :column="1" border style="margin-top: 20px;">
-        <el-descriptions-item label="课题要求">{{ currentTopic.projectRequirement }}</el-descriptions-item>
-        <el-descriptions-item label="审核意见">{{ currentTopic.deptAuditRemark || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="课题描述">{{ currentTopic.topicDesc }}</el-descriptions-item>
+        <el-descriptions-item label="研究内容">{{ currentTopic.researchContent || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="审核意见">{{ currentTopic.departmentheadOpinion || '无' }}</el-descriptions-item>
       </el-descriptions>
+      
+      <!-- 导师信息 -->
+      <el-descriptions title="导师信息" :column="2" border style="margin-top: 20px;">
+        <el-descriptions-item label="导师ID">{{ currentTopic.teacherId }}</el-descriptions-item>
+        <el-descriptions-item label="指导教师">{{ currentTopic.teacherName }}</el-descriptions-item>
+        <el-descriptions-item label="教师账号">{{ currentTopic.teacherAccount }}</el-descriptions-item>
+        <el-descriptions-item label="发布状态">{{ getPublishStatusText(currentTopic.publishStatus) }}</el-descriptions-item>
+        <el-descriptions-item label="发布时间">{{ currentTopic.publishTime || '未发布' }}</el-descriptions-item>
+      </el-descriptions>
+      
+      <!-- 系主任信息 -->
+      <el-descriptions title="系主任信息" :column="2" border style="margin-top: 20px;">
+        <el-descriptions-item label="系主任ID">{{ currentTopic.departmentheadId }}</el-descriptions-item>
+        <el-descriptions-item label="系主任">{{ currentTopic.departmentheadName }}</el-descriptions-item>
+        <el-descriptions-item label="系主任账号">{{ currentTopic.departmentheadAccount }}</el-descriptions-item>
+        <el-descriptions-item label="审核时间">{{ currentTopic.auditTime || '未审核' }}</el-descriptions-item>
+      </el-descriptions>
+      
+      <!-- 学生信息 -->
+      <el-descriptions title="学生信息" :column="2" border style="margin-top: 20px;">
+        <el-descriptions-item label="学生ID">{{ currentTopic.studentId || '未分配' }}</el-descriptions-item>
+        <el-descriptions-item label="学生">{{ currentTopic.studentName || '未分配' }}</el-descriptions-item>
+        <el-descriptions-item label="学生账号">{{ currentTopic.studentAccount || '未分配' }}</el-descriptions-item>
+        <el-descriptions-item label="学生申请状态">{{ currentTopic.applyStatusStudent ? '已被选' : '无人选' }}</el-descriptions-item>
+        <el-descriptions-item label="学生申请时间">{{ currentTopic.studentApplyTime || '未申请' }}</el-descriptions-item>
+      </el-descriptions>
+      
       <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
       </template>
@@ -151,7 +173,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { get, post } from '@/utils/request'
+import { post } from '@/utils/request'
 
 // 搜索表单
 const searchForm = reactive({
@@ -192,7 +214,7 @@ const getTopicList = async () => {
     
     const response = await post('/topicSelect/getTopicSelection', params)
     if (response?.status === 'success') {
-      topicList.value = response.data?.list || []
+      topicList.value = response.data?.records || []
       total.value = response.data?.total || 0
     }
   } catch (error) {
@@ -253,16 +275,6 @@ const getPublishStatusText = (status) => {
 
 const getPublishStatusType = (status) => {
   const map = { 0: 'info', 1: 'success' }
-  return map[status] || 'info'
-}
-
-const getDeptAuditStatusText = (status) => {
-  const map = { 0: '待审核', 1: '通过', 2: '不通过' }
-  return map[status] || '未知'
-}
-
-const getDeptAuditStatusType = (status) => {
-  const map = { 0: 'warning', 1: 'success', 2: 'danger' }
   return map[status] || 'info'
 }
 
