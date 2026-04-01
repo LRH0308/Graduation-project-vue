@@ -61,6 +61,11 @@ const router = createRouter({
           component: () => import("@/views/guidance/GuidanceManage.vue"),
         },
         {
+          path: "user/manage",
+          name: "UserManage",
+          component: () => import("@/views/user/UserManage.vue"),
+        },
+        {
           path: "student/manage",
           name: "StudentManage",
           component: () => import("@/views/student/StudentManage.vue"),
@@ -69,6 +74,11 @@ const router = createRouter({
           path: "teacher/manage",
           name: "TeacherManage",
           component: () => import("@/views/teacher/TeacherManage.vue"),
+        },
+        {
+          path: "guidance/relation",
+          name: "GuidanceRelationManage",
+          component: () => import("@/views/guidance/GuidanceRelationManage.vue"),
         },
         {
           path: "file/manage",
