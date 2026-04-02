@@ -123,6 +123,33 @@ export const processGuidanceApi = {
     apiCall(API.PROCESS_GUIDANCE_RECORD.GET_PROCESS_GUIDANCE_RECORD, data, config),
 };
 
+// ==================== 学生管理接口 ====================
+
+export const studentApi = {
+  // 获取学生信息列表
+  getStudentInfo: (data = {}, config = {}) =>
+    apiCall(API.STUDENT.GET_STUDENT_INFO, data, config),
+};
+
+// ==================== 教师管理接口 ====================
+
+export const teacherApi = {
+  // 获取教师信息列表
+  getTeacherInfo: (data = {}, config = {}) =>
+    apiCall(API.TEACHER.GET_TEACHER_INFO, data, config),
+};
+
+// ==================== 指导关系管理接口 ====================
+
+export const guidanceRelationApi = {
+  // 获取指导关系列表
+  getGuidanceRelation: (data = {}, config = {}) =>
+    apiCall(API.GUIDANCE_RELATION.GET_GUIDANCE_RELATION, data, config),
+  // 批量导入师生关系
+  batchImportRelations: (data, config = {}) =>
+    apiCall(API.GUIDANCE_RELATION.BATCH_IMPORT_RELATIONS, data, config),
+};
+
 // ==================== 文件管理接口 ====================
 
 export const fileApi = {

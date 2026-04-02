@@ -48,45 +48,54 @@
             <span>首页</span>
           </el-menu-item>
           
-          <el-menu-item index="/subject/audit">
-            <el-icon><Document /></el-icon>
-            <span>选题管理</span>
-          </el-menu-item>
+          <!-- 师生管理 -->
+          <el-sub-menu index="/teacherStudent">
+            <template #title>
+              <el-icon><User /></el-icon>
+              <span>师生管理</span>
+            </template>
+            <el-menu-item index="/teacherStudent/student">
+              <span>学生</span>
+            </el-menu-item>
+            <el-menu-item index="/teacherStudent/teacher">
+              <span>导师</span>
+            </el-menu-item>
+            <el-menu-item index="/teacherStudent/guidance">
+              <span>指导关系</span>
+            </el-menu-item>
+          </el-sub-menu>
           
-          <el-menu-item index="/task/audit">
-            <el-icon><Reading /></el-icon>
-            <span>任务书</span>
-          </el-menu-item>
-
-          <el-menu-item index="/openingReport/list">
-            <el-icon><Document /></el-icon>
-            <span>开题报告</span>
-          </el-menu-item>
-          
-          <el-menu-item index="/midtermCheck/list">
-            <el-icon><Reading /></el-icon>
-            <span>中期检查</span>
-          </el-menu-item>
-          
-          <el-menu-item index="/thesisDraft/list">
-            <el-icon><Document /></el-icon>
-            <span>论文初稿</span>
-          </el-menu-item>
-          
-          <el-menu-item index="/thesisFinal/list">
-            <el-icon><Document /></el-icon>
-            <span>论文终稿</span>
-          </el-menu-item>
-          
-          <el-menu-item index="/defense/arrange">
-            <el-icon><Timer /></el-icon>
-            <span>答辩安排</span>
-          </el-menu-item>
-          
-          <el-menu-item index="/processGuidance/list">
-            <el-icon><Reading /></el-icon>
-            <span>过程指导记录</span>
-          </el-menu-item>
+          <!-- 流程管理 -->
+          <el-sub-menu index="/process">
+            <template #title>
+              <el-icon><Operation /></el-icon>
+              <span>流程管理</span>
+            </template>
+            <el-menu-item index="/subject/audit">
+              <span>选题</span>
+            </el-menu-item>
+            <el-menu-item index="/task/audit">
+              <span>任务书</span>
+            </el-menu-item>
+            <el-menu-item index="/openingReport/list">
+              <span>开题报告</span>
+            </el-menu-item>
+            <el-menu-item index="/midtermCheck/list">
+              <span>中期检查</span>
+            </el-menu-item>
+            <el-menu-item index="/thesisDraft/list">
+              <span>论文初稿</span>
+            </el-menu-item>
+            <el-menu-item index="/thesisFinal/list">
+              <span>论文终稿</span>
+            </el-menu-item>
+            <el-menu-item index="/defense/arrange">
+              <span>答辩</span>
+            </el-menu-item>
+            <el-menu-item index="/processGuidance/list">
+              <span>过程指导</span>
+            </el-menu-item>
+          </el-sub-menu>
         </el-menu>
       </el-aside>
       
@@ -104,7 +113,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { 
-  House, Document, Reading, Timer, SwitchButton
+  House, Document, Reading, Timer, SwitchButton, User, Operation
 } from '@element-plus/icons-vue'
 
 const router = useRouter()

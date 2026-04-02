@@ -18,6 +18,21 @@ const routes = [
         component: () => import("@/views/home/Home.vue"),
       },
       {
+        path: "teacherStudent/student",
+        name: "StudentManagement",
+        component: () => import("@/views/teacherStudent/Student.vue"),
+      },
+      {
+        path: "teacherStudent/teacher",
+        name: "TeacherManagement",
+        component: () => import("@/views/teacherStudent/Teacher.vue"),
+      },
+      {
+        path: "teacherStudent/guidance",
+        name: "GuidanceRelationship",
+        component: () => import("@/views/teacherStudent/Guidance.vue"),
+      },
+      {
         path: "subject/audit",
         name: "TopicAudit",
         component: () => import("@/views/subject/TopicAudit.vue"),

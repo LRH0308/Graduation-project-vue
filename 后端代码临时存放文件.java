@@ -1,43 +1,52 @@
 package com.individual.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.individual.entity.dto.TokenAdminInfoDTO;
-import com.individual.entity.dto.UserInfoDTO;
+import com.individual.entity.dto.DefenseArrangementDTO;
+import com.individual.entity.dto.TokenTeacherInfoDTO;
 import com.individual.entity.vo.ResponseVO;
-import com.individual.entity.vo.UserVO;
 import com.individual.exception.BusinessException;
-import com.individual.service.UserInfoService;
+import com.individual.service.DefenseArrangementService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/defenseArrangement")
 @Slf4j
 @Validated
-public class UserController extends ABaseController {
+public class DefenseArrangementController extends ABaseController{
 
     @Resource
-    private UserInfoService userInfoService;
+    private DefenseArrangementService defenseArrangementService;
 
     /**
-     * 分页查询用户列表
-     * 支持按账号、角色、状态等条件筛选
-     *
-     * @param userInfoDTO 查询参数，包含分页信息
-     * @return ResponseVO 包含用户列表分页数据
+     * 获取答辩安排信息
+     * @return
      */
-    @PostMapping("/getUserList")
-    public ResponseVO getUserList(@RequestBody UserInfoDTO userInfoDTO) {
-        TokenAdminInfoDTO tokenUserInfoDTO = getTokenUserInfo(null);
-        if (tokenUserInfoDTO == null) {
+    @PostMapping("/getDefenseArrangement")
+    public ResponseVO getDefenseArrangement(@RequestBody DefenseArrangementDTO defenseArrangementDTO){
+        TokenTeacherInfoDTO tokenTeacherInfoDTO = this.getTokenUserInfo(null);
+        if (tokenTeacherInfoDTO == null){
             throw new BusinessException("请先登录");
         }
-        IPage<UserVO> userPage = userInfoService.getUserList(userInfoDTO);
-        return getSuccessResponseVO(userPage);
+        defenseArrangementDTO.setDeptName(tokenTeacherInfoDTO.getDeptName());
+        return getSuccessResponseVO(this.defenseArrangementService.getDefenseArrangement(defenseArrangementDTO));
+    }
+
+    /**
+     * 安排答辩
+     *
+     * @param defenseArrangementDTO
+     * @return
+     */
+    @PostMapping("/deptArrange")
+    public ResponseVO deptArrange(@RequestBody DefenseArrangementDTO defenseArrangementDTO){
+        TokenTeacherInfoDTO tokenTeacherInfoDTO = this.getTokenUserInfo(null);
+        if (tokenTeacherInfoDTO == null){
+            throw new BusinessException("请先登录");
+        }
+        defenseArrangementDTO.setDeptName(tokenTeacherInfoDTO.getDeptName());
+        this.defenseArrangementService.deptArrange(defenseArrangementDTO, tokenTeacherInfoDTO);
+        return getSuccessResponseVO(null);
     }
 }

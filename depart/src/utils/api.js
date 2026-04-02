@@ -76,6 +76,26 @@ export const API = {
     GET_PROCESS_GUIDANCE_RECORD: { url: "/processGuidanceRecord/getProcessGuidanceRecord", method: "post" },
   },
 
+  // ==================== 学生管理 ====================
+  STUDENT: {
+    // 获取学生信息列表
+    GET_STUDENT_INFO: { url: "/student/getStudentInfo", method: "post" },
+  },
+
+  // ==================== 教师管理 ====================
+  TEACHER: {
+    // 获取教师信息列表
+    GET_TEACHER_INFO: { url: "/teacher/getTeacherInfo", method: "post" },
+  },
+
+  // ==================== 指导关系管理 ====================
+  GUIDANCE_RELATION: {
+    // 获取指导关系列表
+    GET_GUIDANCE_RELATION: { url: "/guidanceRelation/getGuidanceRelation", method: "post" },
+    // 批量导入师生关系
+    BATCH_IMPORT_RELATIONS: { url: "/guidanceRelation/batchImportRelations", method: "post" },
+  },
+
   // ==================== 文件管理 ====================
   FILE: {
     UPLOAD: { url: "/file/upload", method: "post" },
