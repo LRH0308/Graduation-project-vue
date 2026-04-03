@@ -106,7 +106,7 @@ const loginRules = {
 // 获取验证码（参考 student 端实现）
 const getCaptcha = async () => {
   try {
-    const response = await userStore.getCaptcha()
+    const response = await userStore.checkCode()
     
     if (response.status === 'success') {
       captchaImage.value = response.data.checkCode

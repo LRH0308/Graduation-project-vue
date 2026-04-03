@@ -16,7 +16,7 @@ export const useUserStore = defineStore("user", {
   actions: {
     // 清除用户状态
     clearUserState() {
-      this.token = "";
+      this.token = null;
       this.userInfo = null;
       localStorage.removeItem("token");
     },
@@ -53,12 +53,17 @@ export const useUserStore = defineStore("user", {
 
     // 获取登录信息
     async getLoginInfo() {
-      const response = await userApi.getLoginInfo();
-      if (response.status === "success") {
-        this.userInfo = response.data;
-        return response.data;
+      try {
+        const response = await userApi.getLoginInfo();
+        if (response.status === "success") {
+          this.userInfo = response.data;
+          return response.data;
+        }
+        return null;
+      } catch (error) {
+        console.error("获取登录信息失败:", error);
+        throw error;
       }
-      return null;
     },
 
     // 退出登录
@@ -74,6 +79,7 @@ export const useUserStore = defineStore("user", {
         await this.getLoginInfo();
         return true;
       } catch (error) {
+        this.clearUserState();
         return false;
       }
     },

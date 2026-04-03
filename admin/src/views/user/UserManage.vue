@@ -4,6 +4,9 @@
       <template #header>
         <div class="card-header">
           <span>用户管理</span>
+          <el-button type="primary" @click="handleRegisterUser" style="margin-left: 20px;">
+            注册学生和教师
+          </el-button>
         </div>
       </template>
       
@@ -111,7 +114,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { post } from '@/utils/request'
+import { post, get } from '@/utils/request'
 
 // 搜索表单
 const searchForm = reactive({
@@ -192,6 +195,21 @@ const handleView = (row) => {
   detailDialogVisible.value = true
 }
 
+// 注册学生和教师
+const handleRegisterUser = async () => {
+  try {
+    const response = await get('/user/registerUser')
+    if (response?.status === 'success') {
+      ElMessage.success(`成功注册 ${response.data} 个用户`)
+      // 刷新用户列表
+      getUserList()
+    }
+  } catch (error) {
+    console.error('注册学生和教师失败:', error)
+    ElMessage.error('注册学生和教师失败')
+  }
+}
+
 // 角色文本映射
 const getRoleText = (role) => {
   const map = { '': '管理员', 1: '学生', 2: '导师', 3: '系主任' }
@@ -226,6 +244,9 @@ onMounted(() => {
 
 .card-header {
   font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .search-form {
