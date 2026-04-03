@@ -64,12 +64,17 @@
 
           <el-menu-item index="/proposal/audit">
             <el-icon><Edit /></el-icon>
-            <span>开题报告审核</span>
+            <span>开题报告</span>
+          </el-menu-item>
+
+          <el-menu-item index="/translation/audit">
+            <el-icon><DocumentCopy /></el-icon>
+            <span>外文翻译</span>
           </el-menu-item>
 
           <el-menu-item index="/mid/audit">
             <el-icon><Collection /></el-icon>
-            <span>中期检查审核</span>
+            <span>中期检查</span>
           </el-menu-item>
 
           <el-menu-item index="/thesis/draft/audit">
@@ -112,6 +117,7 @@ import {
   Document,
   Reading,
   Edit,
+  DocumentCopy,
   Collection,
   Files,
   Timer,

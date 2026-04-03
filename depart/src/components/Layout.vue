@@ -80,6 +80,9 @@
             <el-menu-item index="/openingReport/list">
               <span>开题报告</span>
             </el-menu-item>
+            <el-menu-item index="/foreignTranslation/list">
+              <span>外文翻译</span>
+            </el-menu-item>
             <el-menu-item index="/midtermCheck/list">
               <span>中期检查</span>
             </el-menu-item>

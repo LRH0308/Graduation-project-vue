@@ -106,6 +106,20 @@ export const API = {
     },
   },
 
+  // ==================== 外文翻译 ====================
+  FOREIGN_LANGUAGE_TRANSLATION: {
+    // 获取外文翻译信息 POST /foreignLanguageTranslation/getForeignLanguageTranslation
+    GET_FOREIGN_LANGUAGE_TRANSLATION: {
+      url: "/foreignLanguageTranslation/getForeignLanguageTranslation",
+      method: "post",
+    },
+    // 提交外文翻译 POST /foreignLanguageTranslation/studentApply
+    STUDENT_APPLY: {
+      url: "/foreignLanguageTranslation/studentApply",
+      method: "post",
+    },
+  },
+
   // ==================== 文件管理 ====================
   FILE: {
     // 上传文件 POST /file/upload

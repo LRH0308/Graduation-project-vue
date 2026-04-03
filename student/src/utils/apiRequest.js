@@ -147,6 +147,17 @@ export const guidanceApi = {
     ),
 };
 
+// ==================== 外文翻译 ====================
+export const foreignTranslationApi = {
+  // 获取外文翻译信息（需要 Token）POST /foreignLanguageTranslation/getForeignLanguageTranslation
+  getForeignLanguageTranslation: (data = {}, config = {}) =>
+    apiCall(API.FOREIGN_LANGUAGE_TRANSLATION.GET_FOREIGN_LANGUAGE_TRANSLATION, data, config),
+
+  // 提交外文翻译（需要 Token）POST /foreignLanguageTranslation/studentApply
+  studentApply: (data, config = {}) =>
+    apiCall(API.FOREIGN_LANGUAGE_TRANSLATION.STUDENT_APPLY, data, config),
+};
+
 // ==================== 文件管理 ====================
 export const fileApi = {
   // 上传文件（需要 Token）POST /file/upload
@@ -199,5 +210,6 @@ export default {
   thesisFinalApi,
   defenseApi,
   guidanceApi,
+  foreignTranslationApi,
   fileApi,
 };

@@ -76,6 +76,15 @@ export const API = {
     GET_PROCESS_GUIDANCE_RECORD: { url: "/processGuidanceRecord/getProcessGuidanceRecord", method: "post" },
   },
 
+  // ==================== 外文翻译 ====================
+  FOREIGN_LANGUAGE_TRANSLATION: {
+    // 获取外文翻译信息
+    GET_FOREIGN_LANGUAGE_TRANSLATION: {
+      url: "/foreignLanguageTranslation/getForeignLanguageTranslation",
+      method: "post",
+    },
+  },
+
   // ==================== 学生管理 ====================
   STUDENT: {
     // 获取学生信息列表

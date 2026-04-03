@@ -86,6 +86,11 @@
             <span>开题报告</span>
           </el-menu-item>
 
+          <el-menu-item index="/translation/submit">
+            <el-icon><DocumentCopy /></el-icon>
+            <span>外文翻译</span>
+          </el-menu-item>
+
           <el-menu-item index="/mid/submit">
             <el-icon><Collection /></el-icon>
             <span>中期成果</span>
@@ -136,6 +141,7 @@ import {
   Document,
   Reading,
   Edit,
+  DocumentCopy,
   Collection,
   Files,
   Timer,

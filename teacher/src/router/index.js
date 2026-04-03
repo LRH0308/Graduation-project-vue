@@ -51,6 +51,12 @@ const router = createRouter({
           name: "ProposalAudit",
           component: () => import("@/views/proposal/ProposalAudit.vue"),
         },
+        // 外文翻译审核
+        {
+          path: "/translation/audit",
+          name: "TranslationAudit",
+          component: () => import("@/views/translation/TranslationAudit.vue"),
+        },
         // 中期检查
         {
           path: "/mid/audit",

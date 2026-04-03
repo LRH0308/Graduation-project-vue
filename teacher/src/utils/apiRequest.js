@@ -128,7 +128,16 @@ export const guidanceRelationApi = {
     apiCall(API.GUIDANCE_RELATION.GET_GUIDANCE_RELATION, data, config),
 };
 
-// ==================== 论文审核接口 ====================
+// ==================== 外文翻译接口 ====================
+
+export const foreignTranslationApi = {
+  getForeignLanguageTranslation: (data = {}, config = {}) =>
+    apiCall(API.FOREIGN_LANGUAGE_TRANSLATION.GET_FOREIGN_LANGUAGE_TRANSLATION, data, config),
+  teacherAudit: (data, config = {}) =>
+    apiCall(API.FOREIGN_LANGUAGE_TRANSLATION.TEACHER_AUDIT, data, config),
+};
+
+// ==================== 文件管理接口 ====================
 
 export const thesisApi = {
   getThesisSubmission: (data = {}, config = {}) =>
@@ -190,5 +199,6 @@ export default {
   defenseApi,
   guidanceApi,
   guidanceRelationApi,
+  foreignTranslationApi,
   fileApi,
 };

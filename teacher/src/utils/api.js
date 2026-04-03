@@ -84,6 +84,18 @@ export const API = {
     TEACHER_FILL: { url: "/processGuidanceRecord/teacherFill", method: "post" },
   },
 
+  // ==================== 外文翻译 ====================
+  FOREIGN_LANGUAGE_TRANSLATION: {
+    GET_FOREIGN_LANGUAGE_TRANSLATION: {
+      url: "/foreignLanguageTranslation/getForeignLanguageTranslation",
+      method: "post",
+    },
+    TEACHER_AUDIT: {
+      url: "/foreignLanguageTranslation/teacherAudit",
+      method: "post",
+    },
+  },
+
   // ==================== 指导关系 ====================
   GUIDANCE_RELATION: {
     GET_GUIDANCE_RELATION: { url: "/GuidanceRelation/getGuidanceRelation", method: "post" },

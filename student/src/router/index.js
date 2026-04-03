@@ -49,6 +49,11 @@ const router = createRouter({
           component: () => import("@/views/proposal/ProposalSubmit.vue"),
         },
         {
+          path: "/translation/submit",
+          name: "ForeignTranslation",
+          component: () => import("@/views/translation/ForeignTranslation.vue"),
+        },
+        {
           path: "/mid/submit",
           name: "MidSubmit",
           component: () => import("@/views/midCheck/MidSubmit.vue"),

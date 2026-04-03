@@ -53,6 +53,11 @@ const routes = [
         component: () => import("@/views/openingReport/OpeningReport.vue"),
       },
       {
+        path: "foreignTranslation/list",
+        name: "ForeignTranslation",
+        component: () => import("@/views/translation/ForeignTranslation.vue"),
+      },
+      {
         path: "midtermCheck/list",
         name: "MidtermCheck",
         component: () => import("@/views/midtermCheck/MidtermCheck.vue"),

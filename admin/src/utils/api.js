@@ -79,6 +79,15 @@ export const API = {
     },
   },
 
+  // ==================== 外文翻译 ====================
+  FOREIGN_LANGUAGE_TRANSLATION: {
+    // 获取外文翻译信息 POST /foreignLanguageTranslation/getForeignLanguageTranslation
+    GET_FOREIGN_LANGUAGE_TRANSLATION: {
+      url: "/foreignLanguageTranslation/getForeignLanguageTranslation",
+      method: "post",
+    },
+  },
+
   // ==================== 文件管理 ====================
   FILE: {
     // 上传文件 POST /file/upload

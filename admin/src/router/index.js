@@ -39,6 +39,12 @@ const router = createRouter({
             import("@/views/openingreport/OpeningReportManage.vue"),
         },
         {
+          path: "translation/manage",
+          name: "ForeignTranslationManage",
+          component: () =>
+            import("@/views/translation/ForeignTranslationManage.vue"),
+        },
+        {
           path: "midtermcheck/manage",
           name: "MidtermCheckManage",
           component: () =>

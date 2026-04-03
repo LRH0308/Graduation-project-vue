@@ -53,6 +53,10 @@
               <el-icon><Edit /></el-icon>
               <span>开题报告</span>
             </el-menu-item>
+            <el-menu-item index="/translation/manage">
+              <el-icon><DocumentCopy /></el-icon>
+              <span>外文翻译</span>
+            </el-menu-item>
             <el-menu-item index="/midtermcheck/manage">
               <el-icon><Collection /></el-icon>
               <span>中期检查</span>
@@ -126,6 +130,7 @@ import {
   Document,
   Reading,
   Edit,
+  DocumentCopy,
   Collection,
   Files,
   Timer,

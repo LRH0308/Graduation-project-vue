@@ -123,6 +123,14 @@ export const processGuidanceApi = {
     apiCall(API.PROCESS_GUIDANCE_RECORD.GET_PROCESS_GUIDANCE_RECORD, data, config),
 };
 
+// ==================== 外文翻译接口 ====================
+
+export const foreignTranslationApi = {
+  // 获取外文翻译信息（需要 Token）
+  getForeignLanguageTranslation: (data = {}, config = {}) =>
+    apiCall(API.FOREIGN_LANGUAGE_TRANSLATION.GET_FOREIGN_LANGUAGE_TRANSLATION, data, config),
+};
+
 // ==================== 学生管理接口 ====================
 
 export const studentApi = {
@@ -168,4 +176,21 @@ export const fileApi = {
       params: { fileId }
     });
   },
+};
+
+export default {
+  userApi,
+  topicApi,
+  taskBookApi,
+  defenseApi,
+  openingReportApi,
+  midtermCheckApi,
+  thesisDraftApi,
+  thesisFinalApi,
+  processGuidanceApi,
+  foreignTranslationApi,
+  studentApi,
+  teacherApi,
+  guidanceRelationApi,
+  fileApi,
 };
