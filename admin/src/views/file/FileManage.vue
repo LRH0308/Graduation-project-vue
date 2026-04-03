@@ -24,6 +24,8 @@
                 <el-option label="论文初稿" :value="4" />
                 <el-option label="论文终稿" :value="5" />
                 <el-option label="答辩材料" :value="6" />
+                <el-option label="外文原文" :value="7" />
+                <el-option label="外文翻译" :value="8" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -222,7 +224,7 @@ const handleView = (row) => {
 
 // 文件类型文本映射
 const getFileTypeText = (type) => {
-  const map = { 1: '任务书', 2: '开题报告', 3: '中期成果', 4: '论文初稿', 5: '论文终稿', 6: '答辩材料' }
+  const map = { 1: '任务书', 2: '开题报告', 3: '中期成果', 4: '论文初稿', 5: '论文终稿', 6: '答辩材料', 7: '外文原文', 8: '外文翻译' }
   return map[type] || '未知'
 }
 

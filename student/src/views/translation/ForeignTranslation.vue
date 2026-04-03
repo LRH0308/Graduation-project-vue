@@ -289,7 +289,7 @@ const handleOriginalFileUpload = async (param) => {
   try {
     const file = param.file;
     const uploadRes = await fileApi.upload(file, {
-      fileType: 6, // 6-外文原文
+      fileType: 7, // 7-外文原文
       projectId: translationInfo.value.projectId || "",
     });
 
@@ -312,7 +312,7 @@ const handleTranslationFileUpload = async (param) => {
   try {
     const file = param.file;
     const uploadRes = await fileApi.upload(file, {
-      fileType: 5, // 5-外文翻译
+      fileType: 8, // 8-外文翻译
       projectId: translationInfo.value.projectId || "",
     });
 
