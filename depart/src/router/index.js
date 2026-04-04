@@ -48,6 +48,11 @@ const routes = [
         component: () => import("@/views/defense/DefenseArrange.vue"),
       },
       {
+        path: "process/config",
+        name: "ProcessNodeConfig",
+        component: () => import("@/views/process/ProcessNodeConfig.vue"),
+      },
+      {
         path: "openingReport/list",
         name: "OpeningReport",
         component: () => import("@/views/openingReport/OpeningReport.vue"),

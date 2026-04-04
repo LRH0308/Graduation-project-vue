@@ -100,6 +100,11 @@ const router = createRouter({
           name: "PlagiarismSetting",
           component: () => import("@/views/plagiarism/PlagiarismSetting.vue"),
         },
+        {
+          path: "process/time/setting",
+          name: "ProcessNodeTimeSetting",
+          component: () => import("@/views/process/ProcessNodeTimeSetting.vue"),
+        },
       ],
     },
   ],

@@ -11,24 +11,58 @@
             </div>
           </template>
           <div class="notice-content">
-            <div v-if="currentNotice" class="notice-item current">
-              <div class="notice-header">
-                <el-tag :type="currentNotice.type" size="small">进行中</el-tag>
-                <span class="notice-date"
-                  >{{ currentNotice.startDate }} 至
-                  {{ currentNotice.endDate }}</span
-                >
+            <div v-if="loading" class="notice-loading">
+              <el-skeleton :rows="3" animated />
+            </div>
+            <div v-else-if="processNodes.length > 0" class="timeline-container">
+              <div class="timeline-wrapper" ref="timelineWrapper">
+                <div class="timeline" :style="{ transform: `translateX(-${scrollPosition}px)` }">
+                  <div 
+                    v-for="(node, index) in processNodes" 
+                    :key="node.nodeCode"
+                    class="timeline-item"
+                    :class="{ 'current': isCurrentNode(node), 'past': isPastNode(node), 'future': isFutureNode(node) }"
+                  >
+                    <div class="timeline-item-content">
+                      <div class="timeline-item-header">
+                        <el-tag :type="getTagType(node)" size="small">
+                          {{ getNodeStatus(node) }}
+                        </el-tag>
+                        <span class="notice-date">
+                          {{ formatDate(node.startTime) }} 至 {{ formatDate(node.endTime) }}
+                        </span>
+                      </div>
+                      <h4 class="notice-title">{{ node.nodeName }}</h4>
+                      <p class="notice-desc">{{ node.remark || '无描述' }}</p>
+                      <div class="notice-actions">
+                        <el-button
+                          type="primary"
+                          size="small"
+                          @click="goTo(getNodeLink(node.nodeCode))"
+                          :disabled="!isCurrentNode(node)"
+                        >
+                          立即处理
+                        </el-button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h4 class="notice-title">{{ currentNotice.title }}</h4>
-              <p class="notice-desc">{{ currentNotice.content }}</p>
-              <div class="notice-actions">
-                <el-button
-                  type="primary"
-                  size="small"
-                  @click="goTo(currentNotice.link)"
-                >
-                  立即处理
-                </el-button>
+              <div class="timeline-controls">
+                <el-button 
+                  type="primary" 
+                  :icon="ArrowLeft" 
+                  circle 
+                  @click="scrollLeft"
+                  :disabled="scrollPosition <= 0"
+                />
+                <el-button 
+                  type="primary" 
+                  :icon="ArrowRight" 
+                  circle 
+                  @click="scrollRight"
+                  :disabled="scrollPosition >= maxScrollPosition"
+                />
               </div>
             </div>
             <div v-else class="notice-empty">
@@ -86,18 +120,18 @@
 
     <!-- 快捷跳转卡片 -->
     <el-row :gutter="20" class="quick-links">
-      <el-col :span="6">
+      <el-col :span="4">
         <el-card
           shadow="hover"
           @click="goTo('/subject/list')"
           class="quick-link-card"
         >
           <el-icon><Document /></el-icon>
-          <div>课题列表</div>
+          <div>选题列表</div>
         </el-card>
       </el-col>
 
-      <el-col :span="6">
+      <el-col :span="4">
         <el-card
           shadow="hover"
           @click="goTo('/task/book')"
@@ -108,7 +142,7 @@
         </el-card>
       </el-col>
 
-      <el-col :span="6">
+      <el-col :span="4">
         <el-card
           shadow="hover"
           @click="goTo('/proposal/submit')"
@@ -119,7 +153,18 @@
         </el-card>
       </el-col>
 
-      <el-col :span="6">
+      <el-col :span="4">
+        <el-card
+          shadow="hover"
+          @click="goTo('/translation/submit')"
+          class="quick-link-card"
+        >
+          <el-icon><Reading /></el-icon>
+          <div>外文翻译</div>
+        </el-card>
+      </el-col>
+
+      <el-col :span="4">
         <el-card
           shadow="hover"
           @click="goTo('/mid/submit')"
@@ -130,7 +175,7 @@
         </el-card>
       </el-col>
 
-      <el-col :span="6">
+      <el-col :span="4">
         <el-card
           shadow="hover"
           @click="goTo('/thesis/submit')"
@@ -141,7 +186,7 @@
         </el-card>
       </el-col>
 
-      <el-col :span="6">
+      <el-col :span="4">
         <el-card
           shadow="hover"
           @click="goTo('/paper/submit')"
@@ -152,7 +197,7 @@
         </el-card>
       </el-col>
 
-      <el-col :span="6">
+      <el-col :span="4">
         <el-card
           shadow="hover"
           @click="goTo('/defense/arrangement')"
@@ -163,7 +208,7 @@
         </el-card>
       </el-col>
 
-      <el-col :span="6">
+      <el-col :span="4">
         <el-card
           shadow="hover"
           @click="goTo('/record/guide')"
@@ -174,7 +219,7 @@
         </el-card>
       </el-col>
 
-      <el-col :span="6">
+      <el-col :span="4">
         <el-card shadow="hover" @click="goTo('/check')" class="quick-link-card">
           <el-icon><CircleCheck /></el-icon>
           <div>检查</div>
@@ -185,9 +230,8 @@
 </template>
 
 <script setup>
-// script 部分保持不变
 import { useRouter } from "vue-router";
-import { computed, ref, onMounted } from "vue";
+import { ref, onMounted, computed, nextTick, watch } from "vue";
 import {
   Document,
   Reading,
@@ -197,83 +241,155 @@ import {
   Timer,
   Comment,
   CircleCheck,
+  ArrowLeft,
+  ArrowRight,
 } from "@element-plus/icons-vue";
 import { useUserStore } from "@/stores/user";
+import { processNodeApi } from "@/utils/apiRequest";
 
 const router = useRouter();
 const userStore = useUserStore();
 
-// 任务阶段配置
-const taskStages = ref([
-  {
-    startDate: "2025-03-01",
-    endDate: "2025-03-14",
-    title: "课题选题",
-    content: "请各位同学及时登录系统完成课题选择",
-    type: "primary",
-    link: "/subject/list",
-  },
-  {
-    startDate: "2025-03-15",
-    endDate: "2025-03-31",
-    title: "任务书下达",
-    content: "导师将下达任务书，请及时查看并确认",
-    type: "success",
-    link: "/task/book",
-  },
-  {
-    startDate: "2025-04-01",
-    endDate: "2025-04-19",
-    title: "开题报告提交",
-    content: "完成开题报告并提交导师审核",
-    type: "warning",
-    link: "/proposal/submit",
-  },
-  {
-    startDate: "2025-04-20",
-    endDate: "2025-04-30",
-    title: "中期检查",
-    content: "提交中期研究成果报告",
-    type: "info",
-    link: "/mid/submit",
-  },
-  {
-    startDate: "2025-05-01",
-    endDate: "2025-05-19",
-    title: "论文初稿",
-    content: "完成论文初稿并提交",
-    type: "success",
-    link: "/thesis/submit",
-  },
-  {
-    startDate: "2025-05-20",
-    endDate: "2025-05-31",
-    title: "论文终稿",
-    content: "完成论文终稿并提交",
-    type: "warning",
-    link: "/paper/submit",
-  },
-  {
-    startDate: "2025-06-01",
-    endDate: "2025-06-15",
-    title: "答辩",
-    content: "参加毕业答辩",
-    type: "danger",
-    link: "/defense/arrangement",
-  },
-]);
+// 流程节点数据
+const processNodes = ref([]);
+const loading = ref(true);
+const scrollPosition = ref(0);
+const maxScrollPosition = ref(0);
+const timelineWrapper = ref(null);
 
-const currentNotice = computed(() => {
+// 获取流程节点配置列表
+const fetchProcessNodes = async () => {
+  try {
+    loading.value = true;
+    const response = await processNodeApi.getList({});
+    processNodes.value = response.data?.records || [];
+    console.log('Process Nodes:', processNodes.value);
+    // 按开始日期排序
+    processNodes.value.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+    console.log('Sorted Process Nodes:', processNodes.value);
+    // 锚定到当前节点
+    await nextTick();
+    anchorToCurrentNode();
+  } catch (error) {
+    console.error("获取流程节点失败:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 格式化日期，从"YYYY-MM-DD HH:mm:ss"格式转换为"YYYY-MM-DD"
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  return dateString.split(' ')[0];
+};
+
+// 检查是否为当前节点
+const isCurrentNode = (node) => {
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
+  const startDate = formatDate(node.startTime);
+  const endDate = formatDate(node.endTime);
+  return todayStr >= startDate && todayStr <= endDate;
+};
 
-  for (const stage of taskStages.value) {
-    if (todayStr >= stage.startDate && todayStr <= stage.endDate) {
-      return stage;
-    }
+// 检查是否为过去节点
+const isPastNode = (node) => {
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+  const endDate = formatDate(node.endTime);
+  return todayStr > endDate;
+};
+
+// 检查是否为未来节点
+const isFutureNode = (node) => {
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+  const startDate = formatDate(node.startTime);
+  return todayStr < startDate;
+};
+
+// 获取节点状态
+const getNodeStatus = (node) => {
+  if (isCurrentNode(node)) return "进行中";
+  if (isPastNode(node)) return "已完成";
+  if (isFutureNode(node)) return "未开始";
+  return "未知";
+};
+
+// 获取标签类型
+const getTagType = (node) => {
+  if (isCurrentNode(node)) return "success";
+  if (isPastNode(node)) return "info";
+  if (isFutureNode(node)) return "warning";
+  return "default";
+};
+
+// 获取节点链接
+const getNodeLink = (nodeCode) => {
+  const linkMap = {
+    TOPIC_SELECTION: "/subject/list",
+    TASK_BOOK: "/task/book",
+    OPENING: "/proposal/submit",
+    TRANSLATION: "/translation/submit",
+    MIDTERM: "/mid/submit",
+    THESIS_DRAFT: "/thesis/submit",
+    THESIS_FINAL: "/paper/submit",
+    DEFENSE: "/defense/arrangement",
+    GUIDANCE: "/record/guide",
+  };
+  return linkMap[nodeCode] || "/home";
+};
+
+// 滚动到左侧
+const scrollLeft = () => {
+  scrollPosition.value = Math.max(0, scrollPosition.value - 240); // 220px + 20px gap
+};
+
+// 滚动到右侧
+const scrollRight = () => {
+  scrollPosition.value = Math.min(maxScrollPosition.value, scrollPosition.value + 240); // 220px + 20px gap
+};
+
+// 锚定到当前节点
+const anchorToCurrentNode = () => {
+  if (!timelineWrapper.value || processNodes.value.length === 0) return;
+  
+  // 找到当前节点的索引
+  const currentIndex = processNodes.value.findIndex(isCurrentNode);
+  
+  // 计算容器宽度和时间轴总宽度
+  const containerWidth = timelineWrapper.value.clientWidth;
+  const itemWidth = 220; // 每个节点的宽度（与CSS一致，减少三分之一）
+  const gap = 20; // 节点之间的间距
+  const totalItemWidth = itemWidth + gap; // 每个节点的实际宽度（包括间距）
+  const timelineWidth = processNodes.value.length * totalItemWidth - gap; // 时间轴总宽度（减去最后一个节点的间距）
+  
+  // 计算最大滚动位置
+  maxScrollPosition.value = Math.max(0, timelineWidth - containerWidth);
+  
+  if (currentIndex !== -1) {
+    // 计算滚动位置，使当前节点居中
+    const scrollTo = currentIndex * totalItemWidth - (containerWidth / 2) + (itemWidth / 2);
+    scrollPosition.value = Math.max(0, Math.min(maxScrollPosition.value, scrollTo));
+  } else {
+    // 如果没有当前节点，滚动到最开始
+    scrollPosition.value = 0;
   }
-  return null;
-});
+};
+
+// 监听窗口大小变化，重新计算滚动范围
+const handleResize = () => {
+  if (timelineWrapper.value && processNodes.value.length > 0) {
+    const containerWidth = timelineWrapper.value.clientWidth;
+    const itemWidth = 220; // 每个节点的宽度（与CSS一致，减少三分之一）
+    const gap = 20; // 节点之间的间距
+    const totalItemWidth = itemWidth + gap; // 每个节点的实际宽度（包括间距）
+    const timelineWidth = processNodes.value.length * totalItemWidth - gap; // 时间轴总宽度（减去最后一个节点的间距）
+    maxScrollPosition.value = Math.max(0, timelineWidth - containerWidth);
+    // 确保滚动位置在有效范围内
+    scrollPosition.value = Math.min(scrollPosition.value, maxScrollPosition.value);
+  }
+};
 
 const goTo = (path) => {
   router.push(path);
@@ -282,6 +398,18 @@ const goTo = (path) => {
 onMounted(() => {
   if (!userStore.userInfo) {
     userStore.getLoginInfo();
+  }
+  fetchProcessNodes();
+  window.addEventListener('resize', handleResize);
+});
+
+// 监听processNodes变化，重新计算滚动位置
+watch(() => processNodes.value.length, () => {
+  if (processNodes.value.length > 0) {
+    // 延迟执行，确保DOM已经渲染
+    setTimeout(() => {
+      anchorToCurrentNode();
+    }, 100);
   }
 });
 </script>
@@ -314,39 +442,84 @@ onMounted(() => {
   padding: 5px 0;
 }
 
-.notice-item {
-  padding: 10px;
+.notice-loading {
+  padding: 20px 0;
+}
+
+.timeline-container {
+  position: relative;
+  min-height: 200px;
+}
+
+.timeline-wrapper {
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 15px;
+}
+
+.timeline {
+  display: flex;
+  transition: transform 0.3s ease;
+  gap: 20px;
+  padding: 10px 0;
+}
+
+.timeline-item {
+  flex: 0 0 220px; /* 减少三分之一，从330px改为220px */
   background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
   border-radius: 8px;
   border-left: 4px solid #409eff;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
-.notice-item.current {
+.timeline-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.timeline-item.current {
   border-left-color: #67c23a;
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2f1 100%);
+  box-shadow: 0 4px 12px rgba(103, 194, 58, 0.2);
 }
 
-.notice-header {
+.timeline-item.past {
+  border-left-color: #909399;
+  background: linear-gradient(135deg, #f9f9f9 0%, #f0f0f0 100%);
+  opacity: 0.8;
+}
+
+.timeline-item.future {
+  border-left-color: #e6a23c;
+  background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+}
+
+.timeline-item-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .notice-date {
   font-size: 12px;
   color: #909399;
+  flex: 1;
+  min-width: 180px;
 }
 
 .notice-title {
-  margin: 0 0 6px 0;
+  margin: 0 0 8px 0;
   font-size: 16px;
   color: #303133;
   font-weight: bold;
 }
 
 .notice-desc {
-  margin: 0 0 10px 0;
+  margin: 0 0 12px 0;
   font-size: 13px;
   color: #606266;
   line-height: 1.5;
@@ -364,6 +537,13 @@ onMounted(() => {
 .notice-empty {
   padding: 20px 0;
   text-align: center;
+}
+
+.timeline-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 /* 个人信息 - 高度和宽度减少 */

@@ -36,6 +36,34 @@
             <span>首页</span>
           </el-menu-item>
           
+          <el-sub-menu index="user">
+            <template #title>
+              <el-icon><User /></el-icon>
+              <span>用户管理</span>
+            </template>
+            <el-menu-item index="/user/manage">
+              <el-icon><UserFilled /></el-icon>
+              <span>用户</span>
+            </el-menu-item>
+            <el-menu-item index="/student/manage">
+              <el-icon><User /></el-icon>
+              <span>学生</span>
+            </el-menu-item>
+            <el-menu-item index="/teacher/manage">
+              <el-icon><UserFilled /></el-icon>
+              <span>教师</span>
+            </el-menu-item>
+            <el-menu-item index="/guidance/relation">
+              <el-icon><Connection /></el-icon>
+              <span>师生关系</span>
+            </el-menu-item>
+          </el-sub-menu>
+          
+          <el-menu-item index="/process/time/setting">
+            <el-icon><Clock /></el-icon>
+            <span>时间设置</span>
+          </el-menu-item>
+          
           <el-sub-menu index="process">
             <template #title>
               <el-icon><Timer /></el-icon>
@@ -86,29 +114,6 @@
               <span>文件管理</span>
             </el-menu-item>
           </el-sub-menu>
-          
-          <el-sub-menu index="user">
-            <template #title>
-              <el-icon><User /></el-icon>
-              <span>用户管理</span>
-            </template>
-            <el-menu-item index="/user/manage">
-              <el-icon><UserFilled /></el-icon>
-              <span>用户</span>
-            </el-menu-item>
-            <el-menu-item index="/student/manage">
-              <el-icon><User /></el-icon>
-              <span>学生</span>
-            </el-menu-item>
-            <el-menu-item index="/teacher/manage">
-              <el-icon><UserFilled /></el-icon>
-              <span>教师</span>
-            </el-menu-item>
-            <el-menu-item index="/guidance/relation">
-              <el-icon><Connection /></el-icon>
-              <span>师生关系</span>
-            </el-menu-item>
-          </el-sub-menu>
         </el-menu>
       </el-aside>
 
@@ -140,6 +145,7 @@ import {
   UserFilled,
   CircleCheck,
   Connection,
+  Clock,
 } from "@element-plus/icons-vue";
 
 const router = useRouter();

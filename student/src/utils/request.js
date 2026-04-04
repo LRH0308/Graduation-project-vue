@@ -113,6 +113,18 @@ request.interceptors.request.use(
       config.data = JSON.stringify(config.data);
     }
 
+    // 检查时间验证状态
+    const userStore = useUserStore();
+    if (userStore.timeVerificationFailed) {
+      if (config.loadingInstance) {
+        config.loadingInstance.close();
+      }
+      return Promise.reject({
+        showError: false,
+        msg: "系统拦截"
+      });
+    }
+
     return config;
   },
   (error) => {
@@ -186,14 +198,15 @@ request.interceptors.response.use(
     }
 
     // 网络错误
-    const showError = error.config?.showError !== false;
+    // 检查错误对象本身是否有showError属性
+    const showError = error.showError !== false;
     if (showError) {
-      ElMessage.error(error.message || "网络异常");
+      ElMessage.error(error.msg || error.message || "网络异常");
     }
 
     return Promise.reject({
       showError,
-      msg: error.message || "网络异常",
+      msg: error.msg || error.message || "网络异常",
     });
   },
 );
@@ -245,10 +258,13 @@ const apiRequest = (config) => {
     if (errorCallback) {
       errorCallback(error);
     }
-    if (error.showError && error.msg) {
-      ElMessage.error(error.msg);
+    if (error.showError && (error.msg || error.message)) {
+      ElMessage.error(error.msg || error.message);
     }
-    return null;
+    return Promise.reject({
+      showError: error.showError,
+      msg: error.msg || error.message || "系统拦截"
+    });
   });
 };
 

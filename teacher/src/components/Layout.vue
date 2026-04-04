@@ -52,6 +52,11 @@
             <span>指导学生</span>
           </el-menu-item>
 
+          <el-menu-item index="/process/timeNode">
+            <el-icon><Clock /></el-icon>
+            <span>时间节点</span>
+          </el-menu-item>
+
           <el-menu-item index="/subject/manage">
             <el-icon><Document /></el-icon>
             <span>选题管理</span>
@@ -124,6 +129,7 @@ import {
   Comment,
   SwitchButton,
   User,
+  Clock,
 } from "@element-plus/icons-vue";
 
 const router = useRouter();

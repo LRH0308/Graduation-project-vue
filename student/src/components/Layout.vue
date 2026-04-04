@@ -70,10 +70,10 @@
           <el-sub-menu index="subject">
             <template #title>
               <el-icon><Document /></el-icon>
-              <span>课题管理</span>
+              <span>选题管理</span>
             </template>
-            <el-menu-item index="/subject/list">课题列表</el-menu-item>
-            <el-menu-item index="/subject/my">我的课题</el-menu-item>
+            <el-menu-item index="/subject/list">选题列表</el-menu-item>
+            <el-menu-item index="/subject/my">我的选题</el-menu-item>
           </el-sub-menu>
 
           <el-menu-item index="/task/book">
@@ -116,23 +116,42 @@
             <span>过程指导记录</span>
           </el-menu-item>
 
-          <el-menu-item index="/check">
-            <el-icon><CircleCheck /></el-icon>
-            <span>检查</span>
-          </el-menu-item>
+          <el-sub-menu index="check">
+            <template #title>
+              <el-icon><CircleCheck /></el-icon>
+              <span>检查</span>
+            </template>
+            <el-menu-item index="/check">检查工具</el-menu-item>
+            <el-menu-item index="/check/library">图书馆</el-menu-item>
+            <el-menu-item index="/check/ai-check">AI率查询</el-menu-item>
+          </el-sub-menu>
         </el-menu>
       </el-aside>
 
       <!-- 右侧白色内容区域（可滚动） -->
       <el-main class="layout-main">
-        <router-view />
+        <div :class="{ 'page-disabled': isTimeVerificationFailed }">
+          <router-view />
+        </div>
+        <!-- 时间验证失败提示 - 居中显示 -->
+        <div v-if="isTimeVerificationFailed" class="time-verification-overlay">
+          <div class="time-verification-content">
+            <el-alert
+              title="当前页面暂未开放"
+              type="warning"
+              description="该功能的开放时间尚未到达或已过期，请在规定时间内操作。"
+              show-icon
+              :closable="false"
+            />
+          </div>
+        </div>
       </el-main>
     </el-container>
   </el-container>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { useUserStore } from "@/stores/user";
@@ -154,11 +173,21 @@ const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
 
+// 计算属性：时间验证是否失败
+const isTimeVerificationFailed = computed(() => userStore.timeVerificationFailed);
+
+// 监听路由变化，重置时间验证状态
+watch(() => route.path, () => {
+  console.log("路由变化:", route.path);
+  console.log("当前时间验证状态:", userStore.timeVerificationFailed);
+});
+
 // 获取当前激活的菜单项
 const activeMenu = computed(() => {
   const path = route.path;
   if (path.startsWith("/subject")) return "subject";
   if (path.startsWith("/defense")) return "defense";
+  if (path.startsWith("/check")) return "check";
   return path;
 });
 
@@ -309,6 +338,7 @@ onMounted(async () => {
   overflow-y: auto; /* 内容过多时可滚动 */
   overflow-x: hidden;
   height: 100%;
+  position: relative;
 }
 
 /* 滚动条样式 */
@@ -333,5 +363,51 @@ onMounted(async () => {
 /* 兼容 IE/Edge */
 .layout-main {
   -ms-overflow-style: none; /* IE/Edge 隐藏滚动条 */
+}
+
+/* 时间验证失败提示 - 居中显示 */
+.time-verification-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+}
+
+.time-verification-content {
+  max-width: 500px;
+  width: 90%;
+  pointer-events: auto;
+}
+
+/* 页面禁用状态 */
+.page-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  position: relative;
+  filter: grayscale(30%);
+}
+
+.page-disabled::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 1;
+  border-radius: 4px;
+}
+
+.page-disabled > * {
+  position: relative;
+  z-index: 0;
 }
 </style>

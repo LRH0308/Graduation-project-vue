@@ -426,7 +426,10 @@ const getSubjectList = async () => {
     }
   } catch (error) {
     console.error("获取列表失败:", error);
-    ElMessage.error("获取列表失败，请稍后重试");
+    // 如果是系统拦截，不显示错误提示
+    if (error.msg !== "系统拦截") {
+      ElMessage.error("获取列表失败，请稍后重试");
+    }
   } finally {
     loading.value = false;
   }

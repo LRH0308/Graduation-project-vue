@@ -9,6 +9,8 @@ export const useUserStore = defineStore("user", {
   state: () => ({
     userInfo: null,
     token: localStorage.getItem("token") || null,
+    timeVerificationFailed: false,
+    currentNodeCode: null,
   }),
 
   getters: {
@@ -17,6 +19,7 @@ export const useUserStore = defineStore("user", {
       if (!state.userInfo) return "";
       return `${state.userInfo.graduationTime} ${state.userInfo.className} ${state.userInfo.studentAccount}【${state.userInfo.name}】`;
     },
+    isPageAvailable: (state) => !state.timeVerificationFailed,
   },
 
   actions: {
@@ -142,7 +145,21 @@ export const useUserStore = defineStore("user", {
     clearUserState() {
       this.token = null;
       this.userInfo = null;
+      this.timeVerificationFailed = false;
+      this.currentNodeCode = null;
       localStorage.removeItem("token");
+    },
+
+    // 设置时间验证状态
+    setTimeVerificationStatus(failed, nodeCode) {
+      this.timeVerificationFailed = failed;
+      this.currentNodeCode = nodeCode;
+    },
+
+    // 重置时间验证状态
+    resetTimeVerificationStatus() {
+      this.timeVerificationFailed = false;
+      this.currentNodeCode = null;
     },
   },
 });

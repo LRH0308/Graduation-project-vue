@@ -129,6 +129,14 @@ export const API = {
     // 获取文件详情 POST /file/getFileDetail
     GET_FILE_DETAIL: { url: "/file/getFileDetail", method: "post" },
   },
+
+  // ==================== 流程节点配置 ====================
+  PROCESS_NODE_CONFIG: {
+    // 时间验证 GET /processNode/timeVerification
+    TIME_VERIFICATION: { url: "/processNode/timeVerification", method: "get" },
+    // 获取流程节点配置列表 POST /processNode/getList
+    GET_LIST: { url: "/processNode/getList", method: "post" },
+  },
 };
 
 /**

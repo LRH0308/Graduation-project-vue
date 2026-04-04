@@ -65,6 +65,12 @@
             </el-menu-item>
           </el-sub-menu>
           
+          <!-- 流程节点配置 -->
+          <el-menu-item index="/process/config">
+            <el-icon><Clock /></el-icon>
+            <span>时间节点</span>
+          </el-menu-item>
+          
           <!-- 流程管理 -->
           <el-sub-menu index="/process">
             <template #title>
@@ -116,7 +122,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { 
-  House, Document, Reading, Timer, SwitchButton, User, Operation
+  House, Document, Reading, Timer, SwitchButton, User, Operation, Clock
 } from '@element-plus/icons-vue'
 
 const router = useRouter()

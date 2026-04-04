@@ -4,13 +4,19 @@
       <template #header>
         <div class="card-header">
           <span>答辩安排</span>
+          <div class="header-buttons">
+            <el-button type="primary" @click="getDefenseList" :loading="loading">
+              <el-icon><Refresh /></el-icon>
+              刷新
+            </el-button>
+          </div>
         </div>
       </template>
       
       <!-- 搜索表单 -->
       <el-form :model="searchForm" inline class="search-form">
         <el-form-item label="学生姓名">
-          <el-input v-model="searchForm.studentName" placeholder="请输入学生姓名" />
+          <el-input v-model="searchForm.studentName" placeholder="请输入学生姓名" clearable />
         </el-form-item>
         <el-form-item label="答辩状态">
           <el-select v-model="searchForm.defenseStatus" placeholder="请选择">
@@ -20,28 +26,32 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button type="primary" @click="handleSearch">查询</el-button>
           <el-button @click="resetSearch">重置</el-button>
         </el-form-item>
       </el-form>
       
       <!-- 列表 -->
-      <el-table :data="defenseList" v-loading="loading" border style="width: 100%">
-        <el-table-column prop="studentName" label="学生姓名" />
-        <el-table-column prop="studentAccount" label="学号" />
-        <el-table-column prop="topicName" label="课题名称" />
-        <el-table-column prop="defensePlace" label="答辩地点" />
-        <el-table-column prop="defenseTime" label="答辩时间" />
-        <el-table-column prop="defenseStatus" label="答辩状态">
+      <el-table :data="defenseList" v-loading="loading" border stripe>
+        <el-table-column type="index" label="序列" width="60" />
+        <el-table-column prop="studentName" label="学生姓名" width="120" />
+        <el-table-column prop="studentAccount" label="学号" width="120" />
+        <el-table-column prop="teacherName" label="指导教师" width="120" />
+        <el-table-column prop="teacherAccount" label="工号" width="120" />
+        <el-table-column prop="defenseTime" label="答辩时间" width="160" />
+        <el-table-column prop="defensePlace" label="答辩地点" width="120" />
+        <el-table-column prop="judgeNames" label="评委姓名" width="180" />
+        <el-table-column prop="defenseStatus" label="答辩状态" width="100">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.defenseStatus)">
               {{ getStatusText(row.defenseStatus) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="100">
+        <el-table-column prop="grade" label="成绩" width="80" />
+        <el-table-column label="操作" width="120" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" @click="handleViewDetail(row)">详情</el-button>
+            <el-button type="primary" size="small" @click="handleViewDetail(row)">详情</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -62,18 +72,16 @@
     <!-- 详情对话框 -->
     <el-dialog v-model="detailDialogVisible" title="答辩安排详情" width="600px">
       <el-descriptions :column="1" border>
+        <el-descriptions-item label="系部名称">{{ currentDefense.deptName || '-' }}</el-descriptions-item>
         <el-descriptions-item label="学生姓名">{{ currentDefense.studentName }}</el-descriptions-item>
         <el-descriptions-item label="学号">{{ currentDefense.studentAccount }}</el-descriptions-item>
-        <el-descriptions-item label="课题名称">{{ currentDefense.topicName }}</el-descriptions-item>
-        <el-descriptions-item label="答辩地点">{{ currentDefense.defensePlace }}</el-descriptions-item>
-        <el-descriptions-item label="答辩时间">{{ currentDefense.defenseTime }}</el-descriptions-item>
+        <el-descriptions-item label="指导教师">{{ currentDefense.teacherName || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="工号">{{ currentDefense.teacherAccount || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="答辩时间">{{ currentDefense.defenseTime || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="答辩地点">{{ currentDefense.defensePlace || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="评委姓名">{{ currentDefense.judgeNames || '-' }}</el-descriptions-item>
         <el-descriptions-item label="答辩状态">{{ getStatusText(currentDefense.defenseStatus) }}</el-descriptions-item>
-        <el-descriptions-item label="评委名单" :span="2">
-          {{ currentDefense.judgeNames || '未安排' }}
-        </el-descriptions-item>
-        <el-descriptions-item label="注意事项" :span="2">
-          {{ currentDefense.notice || '无' }}
-        </el-descriptions-item>
+        <el-descriptions-item label="成绩">{{ currentDefense.grade || '-' }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
@@ -86,6 +94,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { defenseApi } from '@/utils/apiRequest'
+import { Refresh } from '@element-plus/icons-vue'
 
 // 搜索表单
 const searchForm = reactive({
@@ -134,14 +143,41 @@ const useMockData = () => {
   defenseList.value = [
     {
       id: 1,
+      deptCode: 'DEP001',
+      deptName: '软件工程系',
+      projectId: 1,
+      studentId: 1,
+      studentAccount: '2022001',
       studentName: '张三',
-      studentAccount: '2020001',
-      topicName: '基于 Spring Boot 的毕设管理系统',
-      defensePlace: '教学楼 A301',
-      defenseTime: '2025-06-01 09:00:00',
-      judgeNames: '李老师，王老师，赵老师',
+      defensePlace: 'A301教室',
+      defenseTime: '2026-05-20 09:00:00',
+      judgeIds: '1,2,3',
+      judgeNames: '赵老师,钱老师,孙主任',
+      teacherId: 1,
+      teacherAccount: 'T001',
+      teacherName: '赵老师',
+      fileId: 5,
+      defenseStatus: 1,
+      grade: 87.56
+    },
+    {
+      id: 2,
+      deptCode: 'DEP001',
+      deptName: '软件工程系',
+      projectId: 2,
+      studentId: 2,
+      studentAccount: '2022002',
+      studentName: '李四',
+      defensePlace: 'A301教室',
+      defenseTime: '2026-05-20 09:30:00',
+      judgeIds: '1,2,3',
+      judgeNames: '赵老师,钱老师,孙主任',
+      teacherId: 1,
+      teacherAccount: 'T001',
+      teacherName: '赵老师',
+      fileId: null,
       defenseStatus: 0,
-      notice: '请提前 15 分钟到场'
+      grade: null
     }
   ]
   total.value = defenseList.value.length
@@ -190,10 +226,25 @@ onMounted(() => {
 }
 
 .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-weight: bold;
+  color: #333;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 10px;
 }
 
 .search-form {
   margin-bottom: 20px;
+}
+
+/* 表格文本居中 */
+:deep(.el-table th),
+:deep(.el-table td) {
+  text-align: center;
 }
 </style>

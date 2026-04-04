@@ -13,6 +13,35 @@
     </el-card>
     
     <el-row :gutter="20" class="quick-links">
+      <!-- 师生管理 -->
+      <el-col :span="6">
+        <el-card shadow="hover" @click="goTo('/teacherStudent/student')" class="quick-link-card">
+          <el-icon><User /></el-icon>
+          <div>学生管理</div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover" @click="goTo('/teacherStudent/teacher')" class="quick-link-card">
+          <el-icon><User /></el-icon>
+          <div>教师管理</div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover" @click="goTo('/teacherStudent/guidance')" class="quick-link-card">
+          <el-icon><Comment /></el-icon>
+          <div>指导关系</div>
+        </el-card>
+      </el-col>
+      
+      <!-- 时间节点 -->
+      <el-col :span="6">
+        <el-card shadow="hover" @click="goTo('/process/config')" class="quick-link-card">
+          <el-icon><Timer /></el-icon>
+          <div>时间节点</div>
+        </el-card>
+      </el-col>
+      
+      <!-- 流程管理 -->
       <el-col :span="6">
         <el-card shadow="hover" @click="goTo('/subject/audit')" class="quick-link-card">
           <el-icon><Document /></el-icon>
@@ -26,84 +55,56 @@
         </el-card>
       </el-col>
       <el-col :span="6">
+        <el-card shadow="hover" @click="goTo('/openingReport/list')" class="quick-link-card">
+          <el-icon><Edit /></el-icon>
+          <div>开题报告</div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover" @click="goTo('/foreignTranslation/list')" class="quick-link-card">
+          <el-icon><Reading /></el-icon>
+          <div>外文翻译</div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover" @click="goTo('/midtermCheck/list')" class="quick-link-card">
+          <el-icon><Collection /></el-icon>
+          <div>中期检查</div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover" @click="goTo('/thesisDraft/list')" class="quick-link-card">
+          <el-icon><Files /></el-icon>
+          <div>论文初稿</div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="hover" @click="goTo('/thesisFinal/list')" class="quick-link-card">
+          <el-icon><Files /></el-icon>
+          <div>论文终稿</div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
         <el-card shadow="hover" @click="goTo('/defense/arrange')" class="quick-link-card">
           <el-icon><Timer /></el-icon>
           <div>答辩安排</div>
         </el-card>
       </el-col>
       <el-col :span="6">
-        <el-card shadow="hover" @click="goTo('/record/guide')" class="quick-link-card">
+        <el-card shadow="hover" @click="goTo('/processGuidance/list')" class="quick-link-card">
           <el-icon><Comment /></el-icon>
           <div>指导记录</div>
         </el-card>
       </el-col>
     </el-row>
-    
-    <!-- 待办事项统计 -->
-    <el-row :gutter="20" class="stat-links">
-      <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <div class="stat-icon" style="background-color: #409EFF;">
-              <el-icon><Document /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">{{ statData.topicAuditCount }}</div>
-              <div class="stat-label">待审核课题</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
       
-      <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <div class="stat-icon" style="background-color: #67C23A;">
-              <el-icon><Reading /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">{{ statData.taskAuditCount }}</div>
-              <div class="stat-label">待审核任务书</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      
-      <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <div class="stat-icon" style="background-color: #E6A23C;">
-              <el-icon><User /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">{{ statData.studentCount }}</div>
-              <div class="stat-label">本系学生数</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      
-      <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <div class="stat-icon" style="background-color: #F56C6C;">
-              <el-icon><Calendar /></el-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">{{ statData.defenseCount }}</div>
-              <div class="stat-label">待安排答辩</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { Document, Reading, Timer, Comment, User, Calendar } from '@element-plus/icons-vue'
+import { Document, Reading, Timer, Comment, User, Calendar, Files, Collection, Edit } from '@element-plus/icons-vue'
 import { reactive } from 'vue'
 
 const router = useRouter()

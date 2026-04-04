@@ -27,13 +27,19 @@ const router = createRouter({
           name: "Home",
           component: () => import("@/views/home/Home.vue"),
         },
-        // 指导学生信息
+        // 指导学生信息// 指导师生
         {
           path: "/student/info",
           name: "StudentInfo",
           component: () => import("@/views/student/StudentInfo.vue"),
         },
-        // 选题管理
+        // 时间节点
+        {
+          path: "/process/timeNode",
+          name: "TimeNodeConfig",
+          component: () => import("@/views/process/TimeNodeConfig.vue"),
+        },
+        // 过程指导选题管理
         {
           path: "/subject/manage",
           name: "SubjectManage",

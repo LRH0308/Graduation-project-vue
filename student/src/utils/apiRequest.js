@@ -200,6 +200,16 @@ export const fileApi = {
   },
 };
 
+// ==================== 流程节点配置 ====================
+export const processNodeApi = {
+  // 时间验证（需要 Token）GET /processNode/timeVerification
+  timeVerification: (nodeCode, config = {}) =>
+    apiCall(API.PROCESS_NODE_CONFIG.TIME_VERIFICATION, {}, { ...config, params: { nodeCode } }),
+  // 获取流程节点配置列表（需要 Token）POST /processNode/getList
+  getList: (data = {}, config = {}) =>
+    apiCall(API.PROCESS_NODE_CONFIG.GET_LIST, data, config),
+};
+
 export default {
   userApi,
   topicApi,
@@ -212,4 +222,5 @@ export default {
   guidanceApi,
   foreignTranslationApi,
   fileApi,
+  processNodeApi,
 };
