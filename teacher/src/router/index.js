@@ -99,15 +99,14 @@ const router = createRouter({
 });
 
 // 导航守卫
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, from) => {
   const token = localStorage.getItem("token");
   const userStore = useUserStore();
 
   // 需要认证的路由
   if (to.meta.requiresAuth !== false) {
     if (!token || token === "undefined" || token === "null") {
-      next("/login");
-      return;
+      return "/login";
     }
 
     // 有 token 但用户信息为空，验证登录状态
@@ -115,27 +114,26 @@ router.beforeEach(async (to, from, next) => {
       try {
         const isValid = await userStore.getLoginInfo();
         if (!isValid) {
-          next("/login");
-          return;
+          localStorage.removeItem("token");
+          localStorage.removeItem("role");
+          return "/login";
         }
       } catch (error) {
         console.error("路由守卫验证失败:", error);
         // 清除token，避免无限循环
         localStorage.removeItem("token");
         localStorage.removeItem("role");
-        next("/login");
-        return;
+        return "/login";
       }
     }
 
-    next();
+    return true;
   } else {
     // 不需要认证的路由（如登录页）
     if (token && to.path === "/login") {
-      next("/home");
-    } else {
-      next();
+      return "/home";
     }
+    return true;
   }
 });
 

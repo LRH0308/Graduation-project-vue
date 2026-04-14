@@ -92,13 +92,12 @@ const router = createRouter({
 });
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from) => {
   const token = localStorage.getItem("token");
   if (to.path !== "/login" && !token) {
-    next("/login");
-  } else {
-    next();
+    return "/login";
   }
+  return true;
 });
 
 export default router;

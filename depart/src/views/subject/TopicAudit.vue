@@ -51,25 +51,27 @@
           </template>
         </el-table-column>
         <el-table-column prop="auditTime" label="审核时间" width="160" />
-        <el-table-column label="操作" width="100">
+        <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" size="small" @click="handleDetail(row)">详情</el-button>
-            <el-button 
-              v-if="row.applyStatus === 0" 
-              type="success" 
-              size="small" 
-              @click="handleAudit(row, 1)"
-            >
-              通过
-            </el-button>
-            <el-button 
-              v-if="row.applyStatus === 0" 
-              type="danger" 
-              size="small" 
-              @click="handleAudit(row, 2)"
-            >
-              驳回
-            </el-button>
+            <div style="display: flex; gap: 8px; justify-content: center;">
+              <el-button type="primary" size="small" @click="handleDetail(row)">详情</el-button>
+              <el-button 
+                v-if="row.applyStatus === 0" 
+                type="success" 
+                size="small" 
+                @click="handleAudit(row, 1)"
+              >
+                通过
+              </el-button>
+              <el-button 
+                v-if="row.applyStatus === 0" 
+                type="danger" 
+                size="small" 
+                @click="handleAudit(row, 2)"
+              >
+                驳回
+              </el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
