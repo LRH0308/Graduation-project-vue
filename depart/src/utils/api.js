@@ -111,4 +111,33 @@ export const API = {
     DOWNLOAD: { url: "/file/download", method: "get" },
     GET_FILE_DETAIL: { url: "/file/getFileDetail", method: "post" },
   },
+
+  // ==================== 代码查重 ====================
+  CODE_DUPLICATE_CHECK: {
+    UPLOAD_AND_COMPARE: { url: "/codeDuplicateCheck/uploadAndCompare", method: "post" },
+    GET_LIST: { url: "/codeDuplicateCheck/getList", method: "post" },
+    GET_DETAIL: { url: "/codeDuplicateCheck/getDetail", method: "post" },
+    DOWNLOAD_RESULT: { url: "/codeDuplicateCheck/downloadResult", method: "get" },
+  },
+  
+  // ==================== 参考文献格式校对 ====================
+  REFERENCE_CHECK: {
+    CHECK_REFERENCE: { url: "/referenceCheck/checkReference", method: "post" },
+  },
 };
+
+/**
+ * 获取接口配置工具函数
+ * @param {string} module - 模块名 (如 'USER', 'TOPIC_SELECT')
+ * @param {string} api - 接口名 (如 'LOGIN', 'APPLY')
+ * @returns {Object|null} API 配置对象
+ */
+export const getApiConfig = (module, api) => {
+  if (!API[module] || !API[module][api]) {
+    console.error(`API 配置不存在：${module}.${api}`);
+    return null;
+  }
+  return API[module][api];
+};
+
+export default API;

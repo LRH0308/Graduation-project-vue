@@ -102,10 +102,18 @@
             <span>过程指导</span>
           </el-menu-item>
 
-          <el-menu-item index="/codeDuplicateCheck">
-            <el-icon><Files /></el-icon>
-            <span>代码查重</span>
-          </el-menu-item>
+          <el-sub-menu index="check">
+            <template #title>
+              <el-icon><CircleCheck /></el-icon>
+              <span>检查工具</span>
+            </template>
+            <el-menu-item index="/check">检查工具</el-menu-item>
+            <el-menu-item index="/check/library">图书馆</el-menu-item>
+            <el-menu-item index="/check/ai-check">AI率查询</el-menu-item>
+            <el-menu-item index="/check/image-check">图片查重</el-menu-item>
+            <el-menu-item index="/check/reference-check">文献格式</el-menu-item>
+            <el-menu-item index="/check/code-duplicate-check">代码查重</el-menu-item>
+          </el-sub-menu>
         </el-menu>
       </el-aside>
 
@@ -135,6 +143,7 @@ import {
   SwitchButton,
   User,
   Clock,
+  CircleCheck,
 } from "@element-plus/icons-vue";
 
 const router = useRouter();

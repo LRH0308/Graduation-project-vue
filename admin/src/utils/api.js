@@ -117,6 +117,19 @@ export const API = {
     // 保存查重设置 POST /plagiarism/saveSetting
     SAVE_SETTING: { url: "/plagiarism/saveSetting", method: "post" },
   },
+
+  // ==================== 参考文献格式校对 ====================
+  REFERENCE_CHECK: {
+    CHECK_REFERENCE: { url: "/referenceCheck/checkReference", method: "post" },
+  },
+
+  // ==================== 代码查重 ====================
+  CODE_DUPLICATE_CHECK: {
+    UPLOAD_AND_COMPARE: { url: "/codeDuplicateCheck/uploadAndCompare", method: "post" },
+    GET_LIST: { url: "/codeDuplicateCheck/getList", method: "post" },
+    GET_DETAIL: { url: "/codeDuplicateCheck/getDetail", method: "post" },
+    DOWNLOAD_RESULT: { url: "/codeDuplicateCheck/downloadResult", method: "get" },
+  },
 };
 
 /**

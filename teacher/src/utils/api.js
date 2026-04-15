@@ -116,6 +116,11 @@ export const API = {
     GET_DETAIL: { url: "/codeDuplicateCheck/getDetail", method: "post" },
     DOWNLOAD_RESULT: { url: "/codeDuplicateCheck/downloadResult", method: "get" },
   },
+  
+  // ==================== 参考文献格式校对 ====================
+  REFERENCE_CHECK: {
+    CHECK_REFERENCE: { url: "/referenceCheck/checkReference", method: "post" },
+  },
 };
 
 /**

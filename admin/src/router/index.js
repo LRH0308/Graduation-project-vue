@@ -105,6 +105,36 @@ const router = createRouter({
           name: "ProcessNodeTimeSetting",
           component: () => import("@/views/process/ProcessNodeTimeSetting.vue"),
         },
+        {
+          path: "check",
+          name: "Check",
+          component: () => import("@/views/check/Check.vue"),
+        },
+        {
+          path: "check/library",
+          name: "Library",
+          component: () => import("@/views/check/Library.vue"),
+        },
+        {
+          path: "check/ai-check",
+          name: "AiCheck",
+          component: () => import("@/views/check/AiCheck.vue"),
+        },
+        {
+          path: "check/image-check",
+          name: "ImageCheck",
+          component: () => import("@/views/check/ImageCheck.vue"),
+        },
+        {
+          path: "check/reference-check",
+          name: "ReferenceCheck",
+          component: () => import("@/views/check/ReferenceCheck.vue"),
+        },
+        {
+          path: "check/code-duplicate-check",
+          name: "CodeDuplicateCheck",
+          component: () => import("@/views/check/CodeDuplicateCheck.vue"),
+        },
       ],
     },
   ],

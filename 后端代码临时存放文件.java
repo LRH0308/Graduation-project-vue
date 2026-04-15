@@ -1,40 +1,58 @@
 package com.individual.controller;
 
-import com.individual.entity.dto.ReferenceCheckDTO;
-import com.individual.entity.dto.TokenStudentInfoDTO;
-import com.individual.entity.vo.ReferenceCheckVO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.individual.entity.dto.CodeDuplicateCheckDTO;
+import com.individual.entity.dto.TokenAdminInfoDTO;
+import com.individual.entity.dto.TokenTeacherInfoDTO;
+import com.individual.entity.vo.CodeDuplicateCheckVO;
 import com.individual.entity.vo.ResponseVO;
 import com.individual.exception.BusinessException;
-import com.individual.service.ReferenceCheckService;
-import com.individual.service.ThesisDraftService;
+import com.individual.service.CodeDuplicateCheckService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+// 教师端代码查重控制器
 @RestController
-@RequestMapping("/referenceCheck")
+@RequestMapping("/codeDuplicateCheck")
 @Slf4j
 @Validated
-public class ReferenceCheckController extends ABaseController {
+public class CodeDuplicateCheckController extends ABaseController {
 
     @Resource
-    private ReferenceCheckService referenceCheckService;
+    private CodeDuplicateCheckService codeDuplicateCheckService;
 
     /**
-     * 参考文献格式校对
-     *
-     * @param dto 包含待校对的参考文献文本
-     * @return 校对结果
+     * 分页查询代码查重记录列表
      */
-    @PostMapping("/checkReference")
-    public ResponseVO checkReference(@RequestBody @Validated ReferenceCheckDTO dto) {
-        TokenStudentInfoDTO tokenStudentInfoDTO = this.getTokenUserInfo(null);
-        if (tokenStudentInfoDTO == null) {
+    @PostMapping("/getList")
+    public ResponseVO getList(@RequestBody CodeDuplicateCheckDTO dto) {
+        // 从 Token 中获取当前登录教师信息
+        TokenAdminInfoDTO tokenAdminInfoDTO = this.getTokenUserInfo(null);
+        if (tokenAdminInfoDTO == null){
             throw new BusinessException("请先登录");
         }
-        ReferenceCheckVO result = referenceCheckService.checkReferenceFormat(dto);
-        return getSuccessResponseVO(result);
+
+        // 调用服务层查询分页列表
+        IPage<CodeDuplicateCheckVO> page = codeDuplicateCheckService.getCodeDuplicateCheckList(dto);
+        return getSuccessResponseVO(page);
     }
 
+    /**
+     * 下载查重结果文件
+     */
+    @GetMapping("/downloadResult")
+    public void downloadResult(@RequestParam("id") Integer id, HttpServletResponse response) {
+        // 从 Token 中获取当前登录教师信息
+        TokenAdminInfoDTO tokenAdminInfoDTO = this.getTokenUserInfo(null);
+        if (tokenAdminInfoDTO == null){
+            throw new BusinessException("请先登录");
+        }
+
+        // 调用服务层下载结果文件
+        codeDuplicateCheckService.downloadResult(id, response);
+    }
 }

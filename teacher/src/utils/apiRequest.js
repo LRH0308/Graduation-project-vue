@@ -217,6 +217,15 @@ export const codeDuplicateCheckApi = {
   },
 };
 
+// ==================== 参考文献格式校对接口 ====================
+
+export const referenceCheckApi = {
+  // 参考文献格式校对
+  checkReference: (data, config = {}) => {
+    return apiCall(API.REFERENCE_CHECK.CHECK_REFERENCE, data, config);
+  },
+};
+
 // ==================== 统一导出 ====================
 
 export default {
@@ -234,4 +243,5 @@ export default {
   foreignTranslationApi,
   fileApi,
   codeDuplicateCheckApi,
+  referenceCheckApi,
 };
