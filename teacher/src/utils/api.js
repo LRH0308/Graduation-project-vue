@@ -108,6 +108,14 @@ export const API = {
     GET_FILE_DETAIL: { url: "/file/getFileDetail", method: "post" },
     GET_PREVIEW_URL: { url: "/file/getPreviewUrl", method: "post" },
   },
+
+  // ==================== 代码查重 ====================
+  CODE_DUPLICATE_CHECK: {
+    UPLOAD_AND_COMPARE: { url: "/codeDuplicateCheck/uploadAndCompare", method: "post" },
+    GET_LIST: { url: "/codeDuplicateCheck/getList", method: "post" },
+    GET_DETAIL: { url: "/codeDuplicateCheck/getDetail", method: "post" },
+    DOWNLOAD_RESULT: { url: "/codeDuplicateCheck/downloadResult", method: "get" },
+  },
 };
 
 /**

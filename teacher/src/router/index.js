@@ -93,6 +93,12 @@ const router = createRouter({
           name: "GuideRecord",
           component: () => import("@/views/record/GuideRecord.vue"),
         },
+        // 代码查重
+        {
+          path: "/codeDuplicateCheck",
+          name: "CodeDuplicateCheck",
+          component: () => import("@/views/codeDuplicateCheck/CodeDuplicateCheck.vue"),
+        },
       ],
     },
   ],

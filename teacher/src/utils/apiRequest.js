@@ -185,6 +185,38 @@ export const fileApi = {
   },
 };
 
+// ==================== 代码查重接口 ====================
+
+export const codeDuplicateCheckApi = {
+  // 上传两个文件并进行代码相似度比对
+  uploadAndCompare: (sourceFile, comparisonFile, config = {}) => {
+    const formData = new FormData();
+    formData.append("sourceFile", sourceFile);
+    formData.append("comparisonFile", comparisonFile);
+    return apiCall(API.CODE_DUPLICATE_CHECK.UPLOAD_AND_COMPARE, formData, {
+      ...config,
+      isForm: false,
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  // 分页查询代码查重记录列表
+  getList: (data = {}, config = {}) => {
+    return apiCall(API.CODE_DUPLICATE_CHECK.GET_LIST, data, config);
+  },
+  // 查询单个查重记录详情
+  getDetail: (data, config = {}) => {
+    return apiCall(API.CODE_DUPLICATE_CHECK.GET_DETAIL, data, config);
+  },
+  // 下载查重结果文件
+  downloadResult: (id, config = {}) => {
+    return apiCall(API.CODE_DUPLICATE_CHECK.DOWNLOAD_RESULT, {}, {
+      ...config,
+      params: { id },
+      responseType: 'blob'
+    });
+  },
+};
+
 // ==================== 统一导出 ====================
 
 export default {
@@ -201,4 +233,5 @@ export default {
   guidanceRelationApi,
   foreignTranslationApi,
   fileApi,
+  codeDuplicateCheckApi,
 };

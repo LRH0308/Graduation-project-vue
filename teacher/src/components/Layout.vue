@@ -101,6 +101,11 @@
             <el-icon><Comment /></el-icon>
             <span>过程指导</span>
           </el-menu-item>
+
+          <el-menu-item index="/codeDuplicateCheck">
+            <el-icon><Files /></el-icon>
+            <span>代码查重</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
 
