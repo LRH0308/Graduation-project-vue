@@ -210,6 +210,13 @@ export const processNodeApi = {
     apiCall(API.PROCESS_NODE_CONFIG.GET_LIST, data, config),
 };
 
+// ==================== 参考文献格式校对 ====================
+export const referenceCheckApi = {
+  // 参考文献格式校对（需要 Token）POST /referenceCheck/checkReference
+  checkReference: (data, config = {}) =>
+    apiCall(API.REFERENCE_CHECK.CHECK_REFERENCE, data, config),
+};
+
 export default {
   userApi,
   topicApi,
@@ -223,4 +230,5 @@ export default {
   foreignTranslationApi,
   fileApi,
   processNodeApi,
+  referenceCheckApi,
 };

@@ -109,6 +109,18 @@ const router = createRouter({
           component: () => import("@/views/check/AiCheck.vue"),
           meta: { nodeCode: null },
         },
+        {
+          path: "/check/image-check",
+          name: "ImageCheck",
+          component: () => import("@/views/check/ImageCheck.vue"),
+          meta: { nodeCode: null },
+        },
+        {
+          path: "/reference/check",
+          name: "ReferenceCheck",
+          component: () => import("@/views/referenceCheck/ReferenceCheck.vue"),
+          meta: { nodeCode: null },
+        },
       ],
     },
   ],

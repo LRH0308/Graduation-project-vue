@@ -272,15 +272,33 @@ onMounted(async () => {
   overflow: hidden; /* 防止溢出 */
 }
 
-/* 左侧灰色导航菜单 - 固定宽度，不滚动 */
+/* 左侧灰色导航菜单 - 固定宽度，可滚动 */
 .layout-aside {
   width: 200px;
   min-width: 200px;
   max-width: 200px;
   background: #304156;
-  overflow-y: hidden; /* 菜单过多时可滚动 */
+  overflow-y: auto; /* 菜单过多时可滚动 */
   overflow-x: hidden;
   flex-shrink: 0; /* 防止被压缩 */
+}
+
+/* 左侧导航栏滚动条样式 */
+.layout-aside::-webkit-scrollbar {
+  width: 6px;
+}
+
+.layout-aside::-webkit-scrollbar-track {
+  background: #304156;
+}
+
+.layout-aside::-webkit-scrollbar-thumb {
+  background: #409eff;
+  border-radius: 3px;
+}
+
+.layout-aside::-webkit-scrollbar-thumb:hover {
+  background: #66b1ff;
 }
 
 .aside-menu {

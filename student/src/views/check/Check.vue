@@ -32,6 +32,19 @@
             访问
           </el-button>
         </el-card>
+        
+        <el-card class="tool-card" @click="navigateToImageCheck">
+          <div class="tool-icon">
+            <el-icon class="icon-large"><Picture /></el-icon>
+          </div>
+          <div class="tool-info">
+            <h3>图片查重</h3>
+            <p>使用Figcheck进行图片查重</p>
+          </div>
+          <el-button type="primary" class="tool-button">
+            访问
+          </el-button>
+        </el-card>
       </div>
     </el-card>
   </div>
@@ -39,7 +52,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import { Reading, DataAnalysis } from '@element-plus/icons-vue';
+import { Reading, DataAnalysis, Picture } from '@element-plus/icons-vue';
 
 const router = useRouter();
 
@@ -49,6 +62,10 @@ const navigateToLibrary = () => {
 
 const navigateToAiCheck = () => {
   router.push('/check/ai-check');
+};
+
+const navigateToImageCheck = () => {
+  router.push('/check/image-check');
 };
 </script>
 

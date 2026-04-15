@@ -137,6 +137,12 @@ export const API = {
     // 获取流程节点配置列表 POST /processNode/getList
     GET_LIST: { url: "/processNode/getList", method: "post" },
   },
+
+  // ==================== 参考文献格式校对 ====================
+  REFERENCE_CHECK: {
+    // 参考文献格式校对 POST /referenceCheck/checkReference
+    CHECK_REFERENCE: { url: "/referenceCheck/checkReference", method: "post" },
+  },
 };
 
 /**
