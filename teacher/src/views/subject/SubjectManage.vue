@@ -395,7 +395,7 @@ const getDeptList = async () => {
       // 过滤掉学院记录，只保留系记录（deptCode以DEP开头）
       // 并转换为label和value格式
       deptList.value = response.data.records
-        .filter(dept => dept.deptCode.startsWith('DEP'))
+        .filter(dept => dept?.deptCode && dept.deptCode.startsWith('DEP'))
         .map(dept => ({
           label: dept.deptName,
           value: dept.deptCode

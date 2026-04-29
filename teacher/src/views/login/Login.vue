@@ -1,69 +1,93 @@
 <template>
   <div class="login-container">
-    <el-card class="login-card">
-      <template #header>
-        <div class="card-header">
-          <span>毕业设计管理系统 - 教师登录</span>
+    <div class="bg-decoration">
+      <div class="wave wave1"></div>
+      <div class="wave wave2"></div>
+      <div class="wave wave3"></div>
+    </div>
+    
+    <div class="login-wrapper">
+      <div class="login-header">
+        <div class="logo-icon">
+          <el-icon><Reading /></el-icon>
         </div>
-      </template>
+        <h1 class="system-title">毕业设计管理系统</h1>
+        <p class="system-desc">教师端</p>
+      </div>
       
-      <el-form
-        ref="loginFormRef"
-        :model="loginForm"
-        :rules="loginRules"
-        label-width="80px"
-        class="login-form"
-      >
-        <el-form-item label="工号" prop="account">
-          <el-input
-            v-model="loginForm.account"
-            placeholder="请输入工号"
-            prefix-icon="User"
-          />
-        </el-form-item>
+      <div class="login-card">
+        <h2 class="card-title">账号登录</h2>
         
-        <el-form-item label="密码" prop="password">
-          <el-input
-            v-model="loginForm.password"
-            type="password"
-            placeholder="请输入密码"
-            prefix-icon="Lock"
-            show-password
-          />
-        </el-form-item>
-        
-        <el-form-item label="验证码" prop="checkCode">
-          <div class="code-input">
+        <el-form
+          ref="loginFormRef"
+          :model="loginForm"
+          :rules="loginRules"
+          class="login-form"
+        >
+          <el-form-item prop="account">
+            <el-input
+              v-model="loginForm.account"
+              placeholder="请输入工号"
+              size="large"
+              :prefix-icon="User"
+              clearable
+            />
+          </el-form-item>
+          
+          <el-form-item prop="password">
+            <el-input
+              v-model="loginForm.password"
+              type="password"
+              placeholder="请输入密码"
+              size="large"
+              :prefix-icon="Lock"
+              show-password
+              clearable
+              @keyup.enter="handleLogin"
+            />
+          </el-form-item>
+          
+          <el-form-item prop="checkCode">
             <el-input
               v-model="loginForm.checkCode"
               placeholder="请输入验证码"
-              style="width: 150px;"
+              size="large"
+              :prefix-icon="CircleCheck"
+              style="width: 55%;"
+              clearable
+              @keyup.enter="handleLogin"
             />
-            <img
-              v-if="captchaImage"
-              :src="captchaImage"
-              alt="验证码"
-              class="captcha-image"
-              @click="getCaptcha"
-            />
-            <div v-else class="captcha-placeholder" @click="getCaptcha">
-              点击获取验证码
+            <div class="captcha-wrapper" @click="getCaptcha">
+              <img
+                v-if="captchaImage"
+                :src="captchaImage"
+                alt="验证码"
+                class="captcha-img"
+              />
+              <div v-else class="captcha-placeholder">
+                <el-icon><RefreshRight /></el-icon>
+              </div>
             </div>
-          </div>
-        </el-form-item>
-        
-        <el-form-item>
-          <el-button
-            type="primary"
-            :loading="loading"
-            @click="handleLogin"
-            style="width: 100%;"
-          >
-            登录
-          </el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+          </el-form-item>
+          
+          <el-form-item>
+            <el-button
+              type="primary"
+              size="large"
+              :loading="loading"
+              @click="handleLogin"
+              class="login-btn"
+            >
+              登 录
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </div>
+    
+    <div class="footer-hint">
+      <span>© 2024 毕业设计管理系统</span>
+    </div>
   </div>
 </template>
 
@@ -73,6 +97,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { userApi } from '@/utils/apiRequest'
 import { useUserStore } from '@/stores/user'
+import { User, Lock, CircleCheck, RefreshRight, Reading } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -100,7 +125,6 @@ const loginRules = {
   ]
 }
 
-// 获取验证码
 const getCaptcha = async () => {
   try {
     const res = await userApi.checkCode()
@@ -113,7 +137,6 @@ const getCaptcha = async () => {
   }
 }
 
-// 处理登录
 const handleLogin = async () => {
   if (!loginFormRef.value) return
   
@@ -153,54 +176,196 @@ onMounted(() => {
 
 <style scoped>
 .login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: relative;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(120deg, #0077b6 0%, #00b4d8 50%, #90e0ef 100%);
+  overflow: hidden;
+}
+
+.bg-decoration {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.wave {
+  position: absolute;
+  width: 200%;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.wave1 {
+  top: -100px;
+  left: -50%;
+  animation: waveMove 8s ease-in-out infinite;
+}
+
+.wave2 {
+  bottom: -150px;
+  right: -50%;
+  animation: waveMove 10s ease-in-out infinite reverse;
+}
+
+.wave3 {
+  top: 50%;
+  left: -30%;
+  animation: waveMove 12s ease-in-out infinite;
+}
+
+@keyframes waveMove {
+  0%, 100% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(-5%) translateY(10px);
+  }
+}
+
+.login-wrapper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 40px;
+  color: white;
+}
+
+.logo-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.logo-icon .el-icon {
+  font-size: 40px;
+  color: white;
+}
+
+.system-title {
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.system-desc {
+  font-size: 18px;
+  opacity: 0.9;
+  letter-spacing: 4px;
 }
 
 .login-card {
-  width: 450px;
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
 
-.card-header {
-  font-weight: bold;
-  font-size: 18px;
+.card-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
   text-align: center;
+  margin-bottom: 30px;
 }
 
 .login-form {
-  padding: 20px;
+  width: 100%;
 }
 
-.code-input {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.login-form :deep(.el-input__wrapper) {
+  padding: 12px 16px;
+  border-radius: 10px;
 }
 
-.captcha-image {
-  height: 40px;
+.login-form :deep(.el-input__inner) {
+  font-size: 15px;
+}
+
+.captcha-wrapper {
+  margin-left: 12px;
   cursor: pointer;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
+}
+
+.captcha-img {
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  transition: opacity 0.3s;
+}
+
+.captcha-img:hover {
+  opacity: 0.8;
 }
 
 .captcha-placeholder {
-  width: 120px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  background: #f5f7fa;
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
   color: #999;
-  cursor: pointer;
-  background: #f5f5f5;
+  transition: all 0.3s;
 }
 
 .captcha-placeholder:hover {
-  background: #e5e5e5;
+  background: #ebeef5;
+  color: #666;
+}
+
+.captcha-placeholder .el-icon {
+  font-size: 20px;
+}
+
+.login-btn {
+  width: 100%;
+  height: 48px;
+  font-size: 16px;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #0077b6 0%, #00b4d8 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 119, 182, 0.4);
+}
+
+:deep(.el-form-item) {
+  margin-bottom: 20px;
+}
+
+.footer-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
 }
 </style>

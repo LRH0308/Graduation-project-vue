@@ -1,69 +1,113 @@
 <template>
   <div class="login-container">
-    <div class="login-form">
-      <h2 class="login-title">毕业设计管理系统 - 学生端</h2>
-      
-      <el-form
-        ref="loginFormRef"
-        :model="loginForm"
-        :rules="loginRules"
-        label-width="80px"
-      >
-        <el-form-item label="学号" prop="account">
-          <el-input
-            v-model="loginForm.account"
-            placeholder="请输入学号"
-            maxlength="12"
-            clearable
-          />
-        </el-form-item>
-        
-        <el-form-item label="密码" prop="password">
-          <el-input
-            v-model="loginForm.password"
-            type="password"
-            placeholder="请输入密码"
-            maxlength="32"
-            show-password
-            clearable
-            @keyup.enter="handleLogin"
-          />
-        </el-form-item>
-        
-        <el-form-item label="验证码" prop="checkCode">
-          <div class="captcha-container">
-            <el-input
-              v-model="loginForm.checkCode"
-              placeholder="请输入验证码"
-              clearable
-              style="width: 150px;"
-              @keyup.enter="handleLogin"
-            />
-            <img
-              v-if="captchaImage"
-              :src="captchaImage"
-              alt="验证码"
-              class="captcha-image"
-              @click="getCaptcha"
-              title="点击刷新验证码"
-            />
-            <div v-else class="captcha-placeholder" @click="getCaptcha">
-              点击获取验证码
+    <div class="login-left">
+      <div class="login-decoration">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+        <div class="content-wrapper">
+          <h1 class="system-name">毕业设计管理系统</h1>
+          <p class="system-subtitle">学生端</p>
+          <div class="feature-list">
+            <div class="feature-item">
+              <el-icon><Document /></el-icon>
+              <span>论文管理</span>
+            </div>
+            <div class="feature-item">
+              <el-icon><ChatDotRound /></el-icon>
+              <span>师生互动</span>
+            </div>
+            <div class="feature-item">
+              <el-icon><DataAnalysis /></el-icon>
+              <span>进度追踪</span>
+            </div>
+            <div class="feature-item">
+              <el-icon><Files /></el-icon>
+              <span>文件共享</span>
             </div>
           </div>
-        </el-form-item>
+        </div>
+      </div>
+    </div>
+    
+    <div class="login-right">
+      <div class="login-form-wrapper">
+        <div class="login-header">
+          <h2 class="login-title">欢迎登录</h2>
+          <p class="login-hint">请输入您的学号和密码登录系统</p>
+        </div>
         
-        <el-form-item>
-          <el-button
-            type="primary"
-            :loading="loading"
-            @click="handleLogin"
-            style="width: 100%;"
-          >
-            登录
-          </el-button>
-        </el-form-item>
-      </el-form>
+        <el-form
+          ref="loginFormRef"
+          :model="loginForm"
+          :rules="loginRules"
+          class="login-form"
+        >
+          <el-form-item prop="account">
+            <div class="input-wrapper">
+              <el-icon class="input-icon"><User /></el-icon>
+              <el-input
+                v-model="loginForm.account"
+                placeholder="请输入学号"
+                maxlength="12"
+                clearable
+              />
+            </div>
+          </el-form-item>
+          
+          <el-form-item prop="password">
+            <div class="input-wrapper">
+              <el-icon class="input-icon"><Lock /></el-icon>
+              <el-input
+                v-model="loginForm.password"
+                type="password"
+                placeholder="请输入密码"
+                maxlength="32"
+                show-password
+                clearable
+                @keyup.enter="handleLogin"
+              />
+            </div>
+          </el-form-item>
+          
+          <el-form-item prop="checkCode">
+            <div class="captcha-wrapper">
+              <div class="input-wrapper captcha-input">
+                <el-icon class="input-icon"><CircleCheck /></el-icon>
+                <el-input
+                  v-model="loginForm.checkCode"
+                  placeholder="请输入验证码"
+                  clearable
+                  @keyup.enter="handleLogin"
+                />
+              </div>
+              <div class="captcha-image-wrapper" @click="getCaptcha">
+                <img
+                  v-if="captchaImage"
+                  :src="captchaImage"
+                  alt="验证码"
+                  class="captcha-image"
+                />
+                <div v-else class="captcha-placeholder">
+                  <el-icon><RefreshRight /></el-icon>
+                  <span>点击获取</span>
+                </div>
+              </div>
+            </div>
+          </el-form-item>
+          
+          <el-form-item>
+            <el-button
+              type="primary"
+              :loading="loading"
+              @click="handleLogin"
+              class="login-button"
+            >
+              登 录
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
     </div>
   </div>
 </template>
@@ -73,6 +117,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+import { User, Lock, CircleCheck, RefreshRight, Document, ChatDotRound, DataAnalysis, Files } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -80,7 +125,6 @@ const loginFormRef = ref(null)
 const loading = ref(false)
 const captchaImage = ref('')
 
-// 登录表单数据
 const loginForm = reactive({
   account: '',
   password: '',
@@ -88,7 +132,6 @@ const loginForm = reactive({
   checkCodeKey: ''
 })
 
-// 表单验证规则（移除验证码长度限制）
 const loginRules = {
   account: [
     { required: true, message: '请输入学号', trigger: 'blur' },
@@ -100,11 +143,9 @@ const loginRules = {
   ],
   checkCode: [
     { required: true, message: '请输入验证码', trigger: 'blur' }
-    // 移除验证码长度限制
   ]
 }
 
-// 获取验证码
 const getCaptcha = async () => {
   try {
     const response = await userStore.getCaptcha()
@@ -122,7 +163,6 @@ const getCaptcha = async () => {
   }
 }
 
-// 登录
 const handleLogin = async () => {
   if (!loginFormRef.value) return
   
@@ -167,17 +207,6 @@ const handleLogin = async () => {
   })
 }
 
-// 重置表单
-const resetForm = () => {
-  if (!loginFormRef.value) return
-  loginFormRef.value.resetFields()
-  loginForm.account = ''
-  loginForm.password = ''
-  loginForm.checkCode = ''
-  getCaptcha()
-}
-
-// 组件挂载时检查登录状态
 onMounted(async () => {
   if (userStore.token) {
     try {
@@ -198,38 +227,179 @@ onMounted(async () => {
 <style scoped>
 .login-container {
   display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 100vh;
+  background: #f0f2f5;
+}
+
+.login-left {
+  flex: 1;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  overflow: hidden;
 }
 
-.login-form {
+.login-decoration {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.circle-1 {
   width: 400px;
-  padding: 40px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  height: 400px;
+  top: -100px;
+  right: -100px;
 }
 
-.login-title {
+.circle-2 {
+  width: 300px;
+  height: 300px;
+  bottom: -50px;
+  left: -50px;
+}
+
+.circle-3 {
+  width: 200px;
+  height: 200px;
+  top: 50%;
+  left: 30%;
+  transform: translate(-50%, -50%);
+}
+
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+  color: white;
   text-align: center;
-  margin-bottom: 30px;
-  color: #333;
+  padding: 40px;
+}
+
+.system-name {
+  font-size: 42px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+}
+
+.system-subtitle {
+  font-size: 24px;
+  opacity: 0.9;
+  margin-bottom: 60px;
+  letter-spacing: 8px;
+}
+
+.feature-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+.feature-item .el-icon {
   font-size: 24px;
 }
 
-.captcha-container {
+.login-right {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  padding: 40px;
+}
+
+.login-form-wrapper {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-header {
+  margin-bottom: 40px;
+}
+
+.login-title {
+  font-size: 32px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.login-hint {
+  font-size: 14px;
+  color: #999;
+}
+
+.login-form {
+  margin-top: 20px;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.input-wrapper:focus-within {
+  border-color: #667eea;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input-icon {
+  color: #999;
+  margin-right: 12px;
+  font-size: 18px;
+}
+
+.captcha-wrapper {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.captcha-input {
+  flex: 1;
+}
+
+.captcha-image-wrapper {
+  flex-shrink: 0;
 }
 
 .captcha-image {
+  height: 44px;
+  border-radius: 8px;
   cursor: pointer;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  height: 40px;
+  border: 1px solid #e8e8e8;
   transition: opacity 0.3s;
 }
 
@@ -238,19 +408,56 @@ onMounted(async () => {
 }
 
 .captcha-placeholder {
+  height: 44px;
   width: 120px;
-  height: 40px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  gap: 4px;
+  background: #f8f9fa;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
   color: #999;
+  font-size: 12px;
   cursor: pointer;
-  background: #f5f5f5;
+  transition: all 0.3s ease;
 }
 
 .captcha-placeholder:hover {
-  background: #e5e5e5;
+  background: #e8e8e8;
+}
+
+.captcha-placeholder .el-icon {
+  font-size: 18px;
+}
+
+.login-button {
+  width: 100%;
+  height: 48px;
+  font-size: 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+:deep(.el-form-item) {
+  margin-bottom: 24px;
+}
+
+:deep(.el-input__inner) {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+:deep(.el-input__inner:focus) {
+  box-shadow: none;
 }
 </style>
