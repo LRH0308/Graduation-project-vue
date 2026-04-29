@@ -46,6 +46,11 @@
         <el-table-column prop="teacherName" label="导师姓名" width="120" />
         <el-table-column prop="deptName" label="所属系部" width="180" />
         <el-table-column prop="graduationTime" label="毕业届次" width="120" />
+        <el-table-column label="操作" width="120">
+          <template #default="{ row }">
+            <el-button size="small" type="primary" @click="handleEdit(row)">编辑</el-button>
+          </template>
+        </el-table-column>
       </el-table>
       
       <!-- 分页 -->
@@ -60,6 +65,38 @@
         style="margin-top: 20px; text-align: right;"
       />
     </el-card>
+    
+    <!-- 编辑对话框 -->
+    <el-dialog v-model="editDialogVisible" title="编辑指导关系" width="500px">
+      <el-form :model="editForm" label-width="100px" size="small">
+        <el-form-item label="学号" prop="studentAccount">
+          <el-input v-model="editForm.studentAccount" disabled />
+        </el-form-item>
+        <el-form-item label="学生姓名" prop="studentName">
+          <el-input v-model="editForm.studentName" disabled />
+        </el-form-item>
+        <el-form-item label="导师" prop="teacherId" :rules="[{ required: true, message: '请选择导师' }]">
+          <el-select v-model="editForm.teacherId" placeholder="请选择导师" filterable :loading="loadingTeachers" @change="handleTeacherSelect">
+            <el-option
+              v-for="teacher in teachers"
+              :key="teacher.id"
+              :label="`${teacher.teacherAccount}/${teacher.name}`"
+              :value="teacher.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="所属系部" prop="deptName">
+          <el-input v-model="editForm.deptName" disabled />
+        </el-form-item>
+        <el-form-item label="毕业届次">
+          <el-input v-model="editForm.graduationTime" placeholder="请输入毕业届次" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitEdit" :loading="editLoading">保存</el-button>
+      </template>
+    </el-dialog>
     
     <!-- 批量导入对话框 -->
     <el-dialog v-model="importDialogVisible" title="批量导入师生关系" width="700px">
@@ -156,6 +193,20 @@ const importForm = reactive({
       studentIds: []
     }
   ]
+})
+
+// 编辑相关
+const editDialogVisible = ref(false)
+const editLoading = ref(false)
+const editForm = reactive({
+  id: '',
+  studentAccount: '',
+  studentName: '',
+  teacherId: null,
+  teacherAccount: '',
+  teacherName: '',
+  deptName: '',
+  graduationTime: ''
 })
 
 // 获取指导关系列表
@@ -300,6 +351,80 @@ const submitImport = async () => {
     ElMessage.error('导入失败，请重试')
   } finally {
     importLoading.value = false
+  }
+}
+
+// 处理导师选择
+const handleTeacherSelect = () => {
+  if (editForm.teacherId !== null && editForm.teacherId !== undefined && editForm.teacherId !== '') {
+    const teacherId = typeof editForm.teacherId === 'number' ? editForm.teacherId : parseInt(editForm.teacherId)
+    const teacher = teachers.value.find(t => {
+      const tId = typeof t.id === 'number' ? t.id : parseInt(t.id)
+      return tId === teacherId
+    })
+    if (teacher) {
+      editForm.teacherAccount = teacher.teacherAccount || ''
+      editForm.teacherName = teacher.name || ''
+    } else {
+      editForm.teacherAccount = ''
+      editForm.teacherName = ''
+    }
+  } else {
+    editForm.teacherAccount = ''
+    editForm.teacherName = ''
+  }
+}
+
+// 编辑指导关系
+const handleEdit = async (row) => {
+  // 加载教师列表
+  await getTeachers()
+  
+  editForm.id = row.id
+  editForm.studentAccount = row.studentAccount || ''
+  editForm.studentName = row.studentName || ''
+  editForm.teacherId = row.teacherId !== null && row.teacherId !== undefined ? row.teacherId : null
+  editForm.teacherAccount = row.teacherAccount || ''
+  editForm.teacherName = row.teacherName || ''
+  editForm.deptName = row.deptName || ''
+  editForm.graduationTime = row.graduationTime || ''
+  editDialogVisible.value = true
+}
+
+// 提交编辑
+const submitEdit = async () => {
+  if (!editForm.id) {
+    ElMessage.warning('数据异常，请刷新页面重试')
+    return
+  }
+  
+  if (!editForm.teacherId) {
+    ElMessage.warning('请选择导师')
+    return
+  }
+  
+  editLoading.value = true
+  try {
+    const response = await guidanceRelationApi.updateGuidanceRelation({
+      id: editForm.id,
+      teacherId: parseInt(editForm.teacherId),
+      teacherAccount: editForm.teacherAccount,
+      teacherName: editForm.teacherName,
+      graduationTime: editForm.graduationTime
+    })
+    
+    if (response?.status === 'success') {
+      ElMessage.success('修改成功')
+      editDialogVisible.value = false
+      getGuidanceList()
+    } else {
+      ElMessage.error('修改失败')
+    }
+  } catch (error) {
+    console.error('修改指导关系失败:', error)
+    ElMessage.error('修改失败，请重试')
+  } finally {
+    editLoading.value = false
   }
 }
 

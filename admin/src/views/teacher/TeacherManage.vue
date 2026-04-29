@@ -5,6 +5,7 @@
         <div class="card-header">
           <span>导师管理</span>
           <div class="header-buttons">
+            <el-button type="primary" @click="handleAdd">新增教师</el-button>
             <el-button type="success" @click="handleDownloadTemplate">下载导入模板</el-button>
             <el-upload
               class="upload-demo"
@@ -35,10 +36,20 @@
             </el-form-item>
           </el-col>
           <el-col :span="6">
+            <el-form-item label="类型">
+              <el-select v-model="searchForm.roleType" placeholder="请选择类型" clearable>
+                <el-option label="导师" :value="2" />
+                <el-option label="系主任" :value="3" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
             <el-form-item label="系部">
               <el-input v-model="searchForm.deptName" placeholder="请输入系部" clearable />
             </el-form-item>
           </el-col>
+        </el-row>
+        <el-row :gutter="20">
           <el-col :span="6">
             <el-form-item label="学院">
               <el-input v-model="searchForm.collegeName" placeholder="请输入学院" clearable />
@@ -111,6 +122,12 @@
         <el-form-item label="姓名" prop="name">
           <el-input v-model="formData.name" placeholder="请输入姓名" />
         </el-form-item>
+        <el-form-item label="角色类型" prop="roleType">
+          <el-select v-model="formData.roleType" placeholder="请选择角色类型">
+            <el-option label="导师" :value="2" />
+            <el-option label="系主任" :value="3" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="所属系部" prop="deptName">
           <el-input v-model="formData.deptName" placeholder="请输入所属系部" />
         </el-form-item>
@@ -134,7 +151,8 @@ const searchForm = reactive({
   teacherAccount: '',
   name: '',
   deptName: '',
-  collegeName: ''
+  collegeName: '',
+  roleType: ''
 })
 
 // 数据列表
@@ -159,7 +177,8 @@ const formData = reactive({
   id: '',
   teacherAccount: '',
   name: '',
-  deptName: ''
+  deptName: '',
+  roleType: 2
 })
 
 // 表单验证规则
@@ -172,6 +191,9 @@ const formRules = {
   ],
   deptName: [
     { required: true, message: '请输入所属系部', trigger: 'blur' }
+  ],
+  roleType: [
+    { required: true, message: '请选择角色类型', trigger: 'change' }
   ]
 }
 
@@ -248,6 +270,7 @@ const handleAdd = () => {
   formData.id = ''
   formData.teacherAccount = ''
   formData.name = ''
+  formData.roleType = 2
   formData.deptName = ''
   formDialogVisible.value = true
 }
@@ -259,6 +282,7 @@ const handleEdit = (row) => {
   formData.id = row.id
   formData.teacherAccount = row.teacherAccount
   formData.name = row.name
+  formData.roleType = row.roleType || 2
   formData.deptName = row.deptName
   formDialogVisible.value = true
 }
@@ -327,9 +351,11 @@ const handleSubmit = async () => {
           id: formData.id,
           teacherAccount: formData.teacherAccount,
           name: formData.name,
+          roleType: formData.roleType,
           deptName: formData.deptName
         }
-        const response = await post('/teacher/updateTeacher', submitData)
+        const url = isEdit.value ? '/teacher/updateTeacher' : '/teacher/addTeacher'
+        const response = await post(url, submitData)
         
         if (response?.status === 'success') {
           ElMessage.success(isEdit.value ? '编辑成功' : '新增成功')

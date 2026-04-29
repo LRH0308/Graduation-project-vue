@@ -131,6 +131,20 @@ export const useUserStore = defineStore("user", {
       return { status: "success", info: "退出成功" };
     },
 
+    // 修改密码（需要 Token）
+    async updatePassword(oldPassword, newPassword) {
+      try {
+        const response = await userApi.updatePassword({
+          oldPassword,
+          password: newPassword,
+        });
+        return response;
+      } catch (error) {
+        console.error("修改密码失败:", error);
+        throw error;
+      }
+    },
+
     // 清除用户状态
     clearUserState() {
       this.userInfo = null;

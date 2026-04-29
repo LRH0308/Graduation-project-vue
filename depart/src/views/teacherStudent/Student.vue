@@ -14,7 +14,7 @@
       <!-- 搜索表单 -->
       <el-form :model="searchForm" inline class="search-form">
         <el-form-item label="学生姓名">
-          <el-input v-model="searchForm.studentName" placeholder="请输入学生姓名" clearable />
+          <el-input v-model="searchForm.name" placeholder="请输入学生姓名" clearable />
         </el-form-item>
         <el-form-item label="学号">
           <el-input v-model="searchForm.studentAccount" placeholder="请输入学号" clearable />
@@ -59,7 +59,7 @@ import { Refresh } from '@element-plus/icons-vue'
 
 // 搜索表单
 const searchForm = reactive({
-  studentName: '',
+  name: '',
   studentAccount: ''
 })
 
@@ -75,8 +75,8 @@ const getStudentList = async () => {
   loading.value = true
   try {
     const response = await studentApi.getStudentInfo({
-      studentId: searchForm.studentAccount || undefined,
-      studentName: searchForm.studentName || undefined,
+      studentAccount: searchForm.studentAccount || undefined,
+      name: searchForm.name || undefined,
       pageNum: currentPage.value,
       pageSize: pageSize.value
     })
@@ -103,7 +103,7 @@ const handleSearch = () => {
 
 // 重置搜索
 const resetSearch = () => {
-  searchForm.studentName = ''
+  searchForm.name = ''
   searchForm.studentAccount = ''
   currentPage.value = 1
   getStudentList()

@@ -135,6 +135,11 @@ const router = createRouter({
           name: "CodeDuplicateCheck",
           component: () => import("@/views/check/CodeDuplicateCheck.vue"),
         },
+        {
+          path: "department/manage",
+          name: "DepartmentManage",
+          component: () => import("@/views/department/DepartmentManage.vue"),
+        },
       ],
     },
   ],

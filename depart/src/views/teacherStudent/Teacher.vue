@@ -14,7 +14,7 @@
       <!-- 搜索表单 -->
       <el-form :model="searchForm" inline class="search-form">
         <el-form-item label="教师姓名">
-          <el-input v-model="searchForm.teacherName" placeholder="请输入教师姓名" clearable />
+          <el-input v-model="searchForm.name" placeholder="请输入教师姓名" clearable />
         </el-form-item>
         <el-form-item label="工号">
           <el-input v-model="searchForm.teacherAccount" placeholder="请输入工号" clearable />
@@ -56,7 +56,7 @@ import { Refresh } from '@element-plus/icons-vue'
 
 // 搜索表单
 const searchForm = reactive({
-  teacherName: '',
+  name: '',
   teacherAccount: ''
 })
 
@@ -72,8 +72,8 @@ const getTeacherList = async () => {
   loading.value = true
   try {
     const response = await teacherApi.getTeacherInfo({
-      teacherId: searchForm.teacherAccount || undefined,
-      teacherName: searchForm.teacherName || undefined,
+      teacherAccount: searchForm.teacherAccount || undefined,
+      name: searchForm.name || undefined,
       pageNum: currentPage.value,
       pageSize: pageSize.value
     })
@@ -100,7 +100,7 @@ const handleSearch = () => {
 
 // 重置搜索
 const resetSearch = () => {
-  searchForm.teacherName = ''
+  searchForm.name = ''
   searchForm.teacherAccount = ''
   currentPage.value = 1
   getTeacherList()

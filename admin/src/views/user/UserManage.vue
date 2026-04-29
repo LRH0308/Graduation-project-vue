@@ -9,7 +9,7 @@
           </el-button>
         </div>
       </template>
-      
+
       <!-- 搜索表单 -->
       <el-form :model="searchForm" label-width="80px" size="small" class="search-form">
         <el-row :gutter="20">
@@ -42,11 +42,11 @@
           </el-col>
         </el-row>
       </el-form>
-      
+
       <!-- 数据表格 -->
-      <el-table 
-        :data="userList" 
-        border 
+      <el-table
+        :data="userList"
+        border
         style="width: 100%; margin-top: 20px;"
         v-loading="loading"
         align="center"
@@ -67,13 +67,23 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column fixed="right" label="操作" width="120" align="center">
+        <el-table-column fixed="right" label="操作" width="280" align="center">
           <template #default="{ row }">
             <el-button size="small" type="primary" link @click="handleView(row)">查看</el-button>
+            <el-button size="small" type="primary" link @click="handleEdit(row)">编辑</el-button>
+            <el-button
+              size="small"
+              type="danger"
+              link
+              @click="handleDisable(row)"
+              :disabled="row.status === 0"
+            >
+              禁用
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
-      
+
       <!-- 分页 -->
       <el-pagination
         v-model:current-page="currentPage"
@@ -86,7 +96,7 @@
         style="margin-top: 20px; text-align: right;"
       />
     </el-card>
-    
+
     <!-- 详情对话框 -->
     <el-dialog v-model="detailDialogVisible" title="用户详情" width="800px">
       <el-descriptions title="用户信息" :column="2" border>
@@ -103,9 +113,40 @@
           </el-tag>
         </el-descriptions-item>
       </el-descriptions>
-      
+
       <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 编辑对话框 -->
+    <el-dialog v-model="editDialogVisible" title="编辑用户" width="500px">
+      <el-form :model="editForm" :rules="editRules" ref="editFormRef" label-width="100px">
+        <el-form-item label="用户ID">
+          <el-input v-model="editForm.id" disabled />
+        </el-form-item>
+        <el-form-item label="账号">
+          <el-input v-model="editForm.account" disabled />
+        </el-form-item>
+        <el-form-item label="角色" prop="role">
+          <el-select v-model="editForm.role" placeholder="请选择角色" style="width: 100%;">
+            <el-option label="管理员" :value="4" />
+            <el-option label="学生" :value="1" />
+            <el-option label="导师" :value="2" />
+            <el-option label="系主任" :value="3" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="状态" prop="status">
+          <el-select v-model="editForm.status" placeholder="请选择状态" style="width: 100%;">
+            <el-option :value="0" label="禁用" />
+            <el-option :value="1" label="启用" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <el-button @click="editDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleEditSubmit">确定</el-button>
       </template>
     </el-dialog>
   </div>
@@ -113,7 +154,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { post, get } from '@/utils/request'
 
 // 搜索表单
@@ -134,6 +175,20 @@ const loading = ref(false)
 const detailDialogVisible = ref(false)
 const currentUser = ref({})
 
+// 编辑对话框
+const editDialogVisible = ref(false)
+const editFormRef = ref(null)
+const editForm = reactive({
+  id: '',
+  account: '',
+  role: '',
+  status: ''
+})
+const editRules = {
+  role: [{ required: true, message: '请选择角色', trigger: 'change' }],
+  status: [{ required: true, message: '请选择状态', trigger: 'change' }]
+}
+
 // 获取用户列表
 const getUserList = async () => {
   loading.value = true
@@ -149,7 +204,7 @@ const getUserList = async () => {
         delete params[key]
       }
     })
-    
+
     const response = await post('/user/getUserList', params)
     if (response?.status === 'success') {
       userList.value = response.data?.records || []
@@ -193,6 +248,56 @@ const handleCurrentChange = (val) => {
 const handleView = (row) => {
   currentUser.value = { ...row }
   detailDialogVisible.value = true
+}
+
+// 编辑用户
+const handleEdit = (row) => {
+  editForm.id = row.id
+  editForm.account = row.account
+  editForm.role = row.role
+  editForm.status = row.status
+  editDialogVisible.value = true
+}
+
+// 提交编辑
+const handleEditSubmit = async () => {
+  if (!editFormRef.value) return
+  try {
+    await editFormRef.value.validate()
+    const response = await post('/user/updateUser', editForm)
+    if (response?.status === 'success') {
+      ElMessage.success('用户信息更新成功')
+      editDialogVisible.value = false
+      getUserList()
+    }
+  } catch (error) {
+    console.error('更新用户信息失败:', error)
+    if (error !== false) {
+      ElMessage.error('更新用户信息失败')
+    }
+  }
+}
+
+// 禁用用户
+const handleDisable = (row) => {
+  ElMessageBox.confirm(`确定要禁用用户 ${row.account} 吗？`, '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(async () => {
+    try {
+      const response = await post('/user/deleteUser', { id: row.id }, { isForm: true })
+      if (response?.status === 'success') {
+        ElMessage.success('用户已成功禁用')
+        getUserList()
+      }
+    } catch (error) {
+      console.error('禁用用户失败:', error)
+      ElMessage.error('禁用用户失败')
+    }
+  }).catch(() => {
+    // 用户取消操作
+  })
 }
 
 // 注册学生和教师

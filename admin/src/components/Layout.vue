@@ -45,6 +45,10 @@
               <el-icon><UserFilled /></el-icon>
               <span>用户</span>
             </el-menu-item>
+            <el-menu-item index="/department/manage">
+              <el-icon><OfficeBuilding /></el-icon>
+              <span>院系管理</span>
+            </el-menu-item>
             <el-menu-item index="/student/manage">
               <el-icon><User /></el-icon>
               <span>学生</span>
@@ -160,6 +164,7 @@ import {
   CircleCheck,
   Connection,
   Clock,
+  OfficeBuilding,
 } from "@element-plus/icons-vue";
 
 const router = useRouter();

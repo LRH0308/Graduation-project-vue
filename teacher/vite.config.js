@@ -12,11 +12,11 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3007,
+    port: 3010,
     hmr: true,
     proxy: {
       "/teacher": {
-        target: "http://localhost:9094",
+        target: "http://localhost:9095",
         changeOrigin: true,
       },
     },

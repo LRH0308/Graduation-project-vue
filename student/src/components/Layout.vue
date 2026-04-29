@@ -43,11 +43,45 @@
           </div>
         </div>
 
-        <!-- 退出登录按钮 -->
-        <el-button type="danger" size="small" @click="handleLogout">
-          <el-icon><SwitchButton /></el-icon>
-          退出登录
-        </el-button>
+        <!-- 用户下拉菜单 -->
+        <el-dropdown @command="handleUserCommand">
+          <div class="user-dropdown-trigger">
+            <el-icon class="user-icon"><User /></el-icon>
+            <span class="user-text">用户</span>
+            <el-icon class="arrow-icon"><ArrowDown /></el-icon>
+          </div>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="updatePassword">
+                <el-icon><Lock /></el-icon>
+                更改密码
+              </el-dropdown-item>
+              <el-dropdown-item command="logout">
+                <el-icon><SwitchButton /></el-icon>
+                退出登录
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+
+        <!-- 更改密码对话框 -->
+        <el-dialog title="更改密码" v-model="showPasswordDialog" width="400px">
+          <el-form :model="passwordForm" :rules="passwordRules" ref="passwordFormRef" label-width="100px">
+            <el-form-item label="旧密码" prop="oldPassword">
+              <el-input v-model="passwordForm.oldPassword" type="password" placeholder="请输入旧密码" />
+            </el-form-item>
+            <el-form-item label="新密码" prop="newPassword">
+              <el-input v-model="passwordForm.newPassword" type="password" placeholder="请输入新密码（8-18位）" />
+            </el-form-item>
+            <el-form-item label="确认新密码" prop="confirmPassword">
+              <el-input v-model="passwordForm.confirmPassword" type="password" placeholder="请再次输入新密码" />
+            </el-form-item>
+          </el-form>
+          <template #footer>
+            <el-button @click="showPasswordDialog = false">取消</el-button>
+            <el-button type="primary" @click="handleUpdatePassword">确定</el-button>
+          </template>
+        </el-dialog>
       </div>
     </el-header>
 
@@ -169,11 +203,47 @@ import {
   Comment,
   SwitchButton,
   CircleCheck,
+  User,
+  ArrowDown,
+  Lock,
 } from "@element-plus/icons-vue";
 
 const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
+
+const showPasswordDialog = ref(false);
+const passwordForm = ref({
+  oldPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+});
+const passwordFormRef = ref(null);
+const passwordRules = {
+  oldPassword: [{ required: true, message: "请输入旧密码", trigger: "blur" }],
+  newPassword: [
+    { required: true, message: "请输入新密码", trigger: "blur" },
+    {
+      min: 8,
+      max: 18,
+      message: "密码长度为8-18位",
+      trigger: "blur",
+    },
+  ],
+  confirmPassword: [
+    { required: true, message: "请确认新密码", trigger: "blur" },
+    {
+      validator: (rule, value, callback) => {
+        if (value !== passwordForm.value.newPassword) {
+          callback(new Error("两次输入的密码不一致"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ],
+};
 
 // 计算属性：时间验证是否失败
 const isTimeVerificationFailed = computed(() => userStore.timeVerificationFailed);
@@ -194,6 +264,15 @@ const activeMenu = computed(() => {
   return path;
 });
 
+// 处理用户命令
+const handleUserCommand = (command) => {
+  if (command === "updatePassword") {
+    showPasswordDialog.value = true;
+  } else if (command === "logout") {
+    handleLogout();
+  }
+};
+
 // 处理退出登录
 const handleLogout = () => {
   ElMessageBox.confirm("确定要退出登录吗？", "提示", {
@@ -213,6 +292,32 @@ const handleLogout = () => {
     .catch(() => {
       // 用户取消操作
     });
+};
+
+// 处理更改密码
+const handleUpdatePassword = async () => {
+  if (!passwordFormRef.value) return;
+  try {
+    await passwordFormRef.value.validate();
+    const response = await userStore.updatePassword(
+      passwordForm.value.oldPassword,
+      passwordForm.value.newPassword
+    );
+    if (response.status === "success") {
+      ElMessage.success("密码修改成功");
+      showPasswordDialog.value = false;
+      passwordForm.value = {
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      };
+    } else {
+      ElMessage.error(response.info || "修改密码失败");
+    }
+  } catch (error) {
+    console.error("修改密码失败:", error);
+    ElMessage.error(error.message || "修改密码失败");
+  }
 };
 
 // 组件挂载时检查登录状态
@@ -405,6 +510,43 @@ onMounted(async () => {
   max-width: 500px;
   width: 90%;
   pointer-events: auto;
+}
+
+/* 用户下拉菜单 */
+.user-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.user-dropdown-trigger:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.user-icon {
+  font-size: 16px;
+}
+
+.user-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.arrow-icon {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+.el-dropdown:focus .arrow-icon,
+.el-dropdown:hover .arrow-icon {
+  transform: rotate(180deg);
 }
 
 /* 页面禁用状态 */

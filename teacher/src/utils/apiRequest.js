@@ -40,7 +40,7 @@ export const userApi = {
   getLoginInfo: (config = {}) => apiCall(API.USER.GET_LOGIN_INFO, {}, config),
   logout: (config = {}) => apiCall(API.USER.LOGOUT, {}, config),
   updatePassword: (data, config = {}) =>
-    apiCall(API.USER.UPDATE_PASSWORD, data, config),
+    apiCall(API.USER.UPDATE_PASSWORD, data, { ...config, isForm: true }),
 };
 
 // ==================== 选题管理接口 ====================

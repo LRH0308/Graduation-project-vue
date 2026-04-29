@@ -47,7 +47,7 @@ export const userApi = {
   logout: (config = {}) => apiCall(API.USER.LOGOUT, {}, config),
   // 修改密码（需要 Token）
   updatePassword: (data, config = {}) =>
-    apiCall(API.USER.UPDATE_PASSWORD, data, config),
+    apiCall(API.USER.UPDATE_PASSWORD, data, { ...config, isForm: true }),
 };
 
 // ==================== 选题管理接口 ====================
@@ -156,6 +156,9 @@ export const guidanceRelationApi = {
   // 批量导入师生关系
   batchImportRelations: (data, config = {}) =>
     apiCall(API.GUIDANCE_RELATION.BATCH_IMPORT_RELATIONS, data, config),
+  // 更新师生关系（系主任）
+  updateGuidanceRelation: (data, config = {}) =>
+    apiCall(API.GUIDANCE_RELATION.UPDATE_GUIDANCE_RELATION, data, config),
 };
 
 // ==================== 文件管理接口 ====================

@@ -103,6 +103,8 @@ export const API = {
     GET_GUIDANCE_RELATION: { url: "/guidanceRelation/getGuidanceRelation", method: "post" },
     // 批量导入师生关系
     BATCH_IMPORT_RELATIONS: { url: "/guidanceRelation/batchImportRelations", method: "post" },
+    // 更新师生关系（系主任）
+    UPDATE_GUIDANCE_RELATION: { url: "/guidanceRelation/updateGuidanceRelation", method: "post" },
   },
 
   // ==================== 文件管理 ====================

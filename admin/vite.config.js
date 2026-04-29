@@ -16,7 +16,7 @@ export default defineConfig({
     hmr: true,
     proxy: {
       "/admin": {
-        target: "http://localhost:9093",
+        target: "http://localhost:9097",
         changeOrigin: true,
       },
     },

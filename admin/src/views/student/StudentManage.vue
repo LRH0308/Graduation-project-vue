@@ -5,6 +5,7 @@
         <div class="card-header">
           <span>学生管理</span>
           <div class="header-buttons">
+            <el-button type="primary" @click="handleAdd">新增</el-button>
             <el-button type="success" @click="handleDownloadTemplate">下载导入模板</el-button>
             <el-upload
               class="upload-demo"
@@ -20,7 +21,7 @@
           </div>
         </div>
       </template>
-      
+
       <!-- 搜索表单 -->
       <el-form :model="searchForm" label-width="80px" size="small" class="search-form">
         <el-row :gutter="20">
@@ -52,11 +53,11 @@
           </el-col>
         </el-row>
       </el-form>
-      
+
       <!-- 数据表格 -->
-      <el-table 
-        :data="studentList" 
-        border 
+      <el-table
+        :data="studentList"
+        border
         style="width: 100%; margin-top: 20px;"
         v-loading="loading"
         align="center"
@@ -78,7 +79,7 @@
           </template>
         </el-table-column>
       </el-table>
-      
+
       <!-- 分页 -->
       <el-pagination
         v-model:current-page="currentPage"
@@ -91,7 +92,7 @@
         style="margin-top: 20px; text-align: right;"
       />
     </el-card>
-    
+
     <!-- 详情对话框 -->
     <el-dialog v-model="detailDialogVisible" title="学生详情" width="800px">
       <!-- 学生信息 -->
@@ -106,35 +107,61 @@
       <el-descriptions :column="1" border style="margin-top: 20px;">
         <el-descriptions-item label="课题名称">{{ currentStudent.topicName || '无' }}</el-descriptions-item>
       </el-descriptions>
-      
+
       <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
       </template>
     </el-dialog>
-    
+
     <!-- 编辑对话框 -->
-    <el-dialog v-model="formDialogVisible" title="编辑学生" width="500px">
-      <el-form :model="formData" label-width="100px" size="small" :rules="formRules" ref="formRef">
-        <el-form-item label="学号" prop="studentAccount">
-          <el-input v-model="formData.studentAccount" placeholder="请输入学号" disabled />
+    <el-dialog v-model="editDialogVisible" title="编辑学生" width="500px">
+      <el-form :model="editFormData" label-width="100px" size="small" :rules="editFormRules" ref="editFormRef">
+        <el-form-item label="学号">
+          <el-input v-model="editFormData.studentAccount" disabled />
         </el-form-item>
         <el-form-item label="姓名" prop="name">
-          <el-input v-model="formData.name" placeholder="请输入姓名" />
+          <el-input v-model="editFormData.name" placeholder="请输入姓名" />
         </el-form-item>
         <el-form-item label="所属系部" prop="deptName">
-          <el-input v-model="formData.deptName" placeholder="请输入所属系部" />
+          <el-input v-model="editFormData.deptName" placeholder="请输入所属系部" />
         </el-form-item>
         <el-form-item label="班级" prop="className">
-          <el-input v-model="formData.className" placeholder="请输入班级" />
+          <el-input v-model="editFormData.className" placeholder="请输入班级" />
         </el-form-item>
         <el-form-item label="毕业时间" prop="graduationTime">
-          <el-input v-model="formData.graduationTime" placeholder="如：2026届" />
+          <el-input v-model="editFormData.graduationTime" placeholder="如：2026届" />
         </el-form-item>
       </el-form>
-      
+
       <template #footer>
-        <el-button @click="formDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="handleSubmit">保存</el-button>
+        <el-button @click="editDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleEditSubmit">保存</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 新增对话框 -->
+    <el-dialog v-model="addDialogVisible" title="新增学生" width="500px">
+      <el-form :model="addFormData" label-width="100px" size="small" :rules="addFormRules" ref="addFormRef">
+        <el-form-item label="学号" prop="studentAccount">
+          <el-input v-model="addFormData.studentAccount" placeholder="请输入学号" />
+        </el-form-item>
+        <el-form-item label="姓名" prop="name">
+          <el-input v-model="addFormData.name" placeholder="请输入姓名" />
+        </el-form-item>
+        <el-form-item label="所属系部" prop="deptName">
+          <el-input v-model="addFormData.deptName" placeholder="请输入所属系部" />
+        </el-form-item>
+        <el-form-item label="班级" prop="className">
+          <el-input v-model="addFormData.className" placeholder="请输入班级" />
+        </el-form-item>
+        <el-form-item label="毕业时间" prop="graduationTime">
+          <el-input v-model="addFormData.graduationTime" placeholder="如：2026届" />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <el-button @click="addDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleAddSubmit">确定</el-button>
       </template>
     </el-dialog>
   </div>
@@ -168,9 +195,9 @@ const currentStudent = ref({})
 const selectedStudents = ref([])
 
 // 编辑对话框
-const formDialogVisible = ref(false)
-const formRef = ref(null)
-const formData = reactive({
+const editDialogVisible = ref(false)
+const editFormRef = ref(null)
+const editFormData = reactive({
   id: '',
   studentAccount: '',
   name: '',
@@ -178,9 +205,32 @@ const formData = reactive({
   className: '',
   graduationTime: ''
 })
+const editFormRules = {
+  name: [
+    { required: true, message: '请输入姓名', trigger: 'blur' }
+  ],
+  deptName: [
+    { required: true, message: '请输入所属系部', trigger: 'blur' }
+  ],
+  className: [
+    { required: true, message: '请输入班级', trigger: 'blur' }
+  ]
+}
 
-// 表单验证规则
-const formRules = {
+// 新增对话框
+const addDialogVisible = ref(false)
+const addFormRef = ref(null)
+const addFormData = reactive({
+  studentAccount: '',
+  name: '',
+  deptName: '',
+  className: '',
+  graduationTime: ''
+})
+const addFormRules = {
+  studentAccount: [
+    { required: true, message: '请输入学号', trigger: 'blur' }
+  ],
   name: [
     { required: true, message: '请输入姓名', trigger: 'blur' }
   ],
@@ -207,7 +257,7 @@ const getStudentList = async () => {
         delete params[key]
       }
     })
-    
+
     const response = await post('/student/getStudentInfo', params)
     if (response?.status === 'success') {
       studentList.value = response.data?.records || []
@@ -258,16 +308,71 @@ const handleSelectionChange = (val) => {
   selectedStudents.value = val
 }
 
+// 新增学生
+const handleAdd = () => {
+  // 重置表单
+  addFormData.studentAccount = ''
+  addFormData.name = ''
+  addFormData.deptName = ''
+  addFormData.className = ''
+  addFormData.graduationTime = ''
+  addDialogVisible.value = true
+}
+
+// 提交新增
+const handleAddSubmit = async () => {
+  if (!addFormRef.value) return
+
+  await addFormRef.value.validate(async (valid) => {
+    if (valid) {
+      try {
+        const response = await post('/student/addStudent', addFormData)
+
+        if (response?.status === 'success') {
+          ElMessage.success('新增成功')
+          addDialogVisible.value = false
+          getStudentList()
+        }
+      } catch (error) {
+        console.error('新增学生失败:', error)
+        ElMessage.error('新增学生失败')
+      }
+    }
+  })
+}
+
 // 编辑学生
 const handleEdit = (row) => {
   // 填充表单
-  formData.id = row.id
-  formData.studentAccount = row.studentAccount
-  formData.name = row.name
-  formData.deptName = row.deptName
-  formData.className = row.className
-  formData.graduationTime = row.graduationTime
-  formDialogVisible.value = true
+  editFormData.id = row.id
+  editFormData.studentAccount = row.studentAccount
+  editFormData.name = row.name
+  editFormData.deptName = row.deptName
+  editFormData.className = row.className
+  editFormData.graduationTime = row.graduationTime
+  editDialogVisible.value = true
+}
+
+// 提交编辑
+const handleEditSubmit = async () => {
+  if (!editFormRef.value) return
+
+  await editFormRef.value.validate(async (valid) => {
+    if (valid) {
+      try {
+        const response = await post('/student/updateStudent', editFormData)
+
+        if (response?.status === 'success') {
+          ElMessage.success('编辑成功')
+          editDialogVisible.value = false
+          getStudentList()
+        }
+      } catch (error) {
+        console.error('编辑学生失败:', error)
+        ElMessage.error('编辑学生失败')
+      }
+    }
+  })
 }
 
 // 删除学生
@@ -298,7 +403,7 @@ const handleBatchDelete = () => {
     ElMessage.warning('请选择要删除的学生')
     return
   }
-  
+
   ElMessageBox.confirm('确定要删除选中的学生吗？', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -321,37 +426,15 @@ const handleBatchDelete = () => {
   })
 }
 
-// 提交表单
-const handleSubmit = async () => {
-  if (!formRef.value) return
-  
-  await formRef.value.validate(async (valid) => {
-    if (valid) {
-      try {
-        const response = await post('/student/updateStudent', formData)
-        
-        if (response?.status === 'success') {
-          ElMessage.success('编辑成功')
-          formDialogVisible.value = false
-          getStudentList()
-        }
-      } catch (error) {
-        console.error('编辑学生失败:', error)
-        ElMessage.error('编辑学生失败')
-      }
-    }
-  })
-}
-
 // 下载导入模板
 const handleDownloadTemplate = async () => {
   try {
     const response = await download('/student/downloadTemplate')
-    
+
     if (!response) {
       throw new Error('下载失败')
     }
-    
+
     const url = window.URL.createObjectURL(response)
     const link = document.createElement('a')
     link.href = url
@@ -360,7 +443,7 @@ const handleDownloadTemplate = async () => {
     link.click()
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
-    
+
     ElMessage.success('模板下载成功')
   } catch (error) {
     console.error('下载模板失败:', error)
@@ -371,24 +454,24 @@ const handleDownloadTemplate = async () => {
 // 处理文件上传
 const handleFileChange = async (file) => {
   if (!file) return
-  
+
   // 检查文件类型
   const fileName = file.name
   if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xls')) {
     ElMessage.error('请上传 Excel 格式的文件（.xlsx 或 .xls）')
     return
   }
-  
+
   const formData = new FormData()
   formData.append('file', file.raw)
-  
+
   try {
     const response = await post('/student/importFromExcel', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     })
-    
+
     if (response?.status === 'success') {
       ElMessage.success(`导入成功，共导入 ${response.data} 条记录`)
       getStudentList()
